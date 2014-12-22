@@ -3,7 +3,7 @@ package bp.trainapp.service
 import reactivemongo.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class MongoDbDriver(override val host: String, override val dbName: String) {
+class MongoDbDriver(val host: String, val dbName: String) {
   
 	def connect() = {
 	  // gets an instance of the driver
@@ -19,4 +19,8 @@ class MongoDbDriver(override val host: String, override val dbName: String) {
 	  val cnn = connect()
 	  cnn(name)
 	}
+}
+
+trait DbDriverComponent {
+  val db:MongoDbDriver
 }
