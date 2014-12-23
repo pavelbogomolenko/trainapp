@@ -1,5 +1,7 @@
 package bp.trainapp.service
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import akka.actor.Actor
 import spray.routing._
 import spray.http._
@@ -8,6 +10,11 @@ import spray.json.DefaultJsonProtocol._
 import spray.http.MediaTypes._
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directive.pimpApply
+import spray.httpx.SprayJsonSupport
+
+import bp.trainapp.repository.UserRepository
+import bp.trainapp.service.DbDriverComponent
+import bp.trainapp.service.MongoDbDriver
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -25,7 +32,10 @@ class HttpApiServiceActor extends Actor with HttpApiService {
 
 
 // this trait defines our service behavior independently from the service actor
-trait HttpApiService extends HttpService {
+trait HttpApiService extends HttpService with SprayJsonSupport {
+  
+  val API_ROUET_PREFIX = "api"
+  val API_VERSION = "1.0"
 	
   def getJson(route: Route): Route = {
     get {
@@ -34,26 +44,22 @@ trait HttpApiService extends HttpService {
       }
     }
   }
-	
+  
+  
+  val userRepository = new UserRepository with DbDriverComponent {
+    val db = new MongoDbDriver("localhost", "trainapp")
+  }
+  
+  /**
+   * routes definition
+   */
   val myRoute =
-    path("login") {
-      post {
-        respondWithMediaType(`text/html`) { // XML is marshalled to `text/xml` by default, so we simply override here
-          complete {
-            <html>
-              <body>
-                <h1>Login!</h1>
-              </body>
-            </html>
-          }
-        }
-      }
-    } ~
-    path("json") {
-      getJson {
-          complete {
-              """{"test": 123}"""
-          }
-      }
-    }
+    path(API_ROUET_PREFIX / API_VERSION / "user") {
+    	getJson {
+    	  complete {
+    	  	//"""{"user": "123"}"""
+		    	userRepository.list().map(list => list.map(u => u.age))
+    	  }
+    	}
+  	}
 }
