@@ -15,8 +15,9 @@ import spray.routing.Directive.pimpApply
 import spray.httpx.SprayJsonSupport
 
 import bp.trainapp.repository.UserProfileRepository
+import bp.trainapp.repository.UserRepository
+
 import bp.trainapp.service._
-import bp.trainapp.model.UserProfileJsonProtocol._
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -54,6 +55,10 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     val db = new MongoDbDriver("localhost", "trainapp")
   }
   
+  val userRepository = new UserRepository with DbDriverComponent {
+    val db = new MongoDbDriver("localhost", "trainapp")
+  }
+  
   /**
    * routes definition
    */
@@ -61,8 +66,17 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     path(API_ROUET_PREFIX / API_VERSION / "userprofile") {
     	getJson {
     	  complete {
+    	    import bp.trainapp.model.UserProfileJsonProtocol._
     	    userProfileRepository.list()
     	  }
     	}
+  	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "user") {
+  	  getJson {
+  	    complete {
+  	      import bp.trainapp.model.UserJsonProtocol._
+  	      userRepository.list()
+  	    }
+  	  }
   	}
 }

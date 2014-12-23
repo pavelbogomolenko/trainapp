@@ -9,20 +9,20 @@ import reactivemongo.api._
 import reactivemongo.bson._
 
 import bp.trainapp.service.DbDriverComponent
-import bp.trainapp.model.UserProfile
+import bp.trainapp.model.User
 
-trait UserProfileRepository {
+trait UserRepository {
   this: DbDriverComponent =>
     
-  val collectionName = "trainapp.userprofile"
+  val collectionName = "trainapp.user"
   
-	def list(): Future[List[UserProfile]] = {
+	def list(): Future[List[User]] = {
 	  val query = BSONDocument()
 	
 	  //getting a list
 	  db.collection(collectionName).
 	    find(query).
-	    cursor[UserProfile].
+	    cursor[User].
 	    collect[List]()
 	}
 }
