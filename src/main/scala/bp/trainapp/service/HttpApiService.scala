@@ -6,7 +6,7 @@ import akka.actor.Actor
 import spray.routing._
 import spray.http._
 import spray.json._
-import spray.json.DefaultJsonProtocol._
+//import spray.json.DefaultJsonProtocol._
 import spray.http.MediaTypes._
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directive.pimpApply
@@ -15,6 +15,7 @@ import spray.httpx.SprayJsonSupport
 import bp.trainapp.repository.UserRepository
 import bp.trainapp.service.DbDriverComponent
 import bp.trainapp.service.MongoDbDriver
+import bp.trainapp.models.UserJsonProtocol._
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -58,7 +59,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	getJson {
     	  complete {
     	  	//"""{"user": "123"}"""
-		    	userRepository.list().map(list => list.map(u => u.age))
+		    	userRepository.list().map(list => list.map(u => u))
     	  }
     	}
   	}
