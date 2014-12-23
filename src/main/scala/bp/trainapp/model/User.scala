@@ -1,4 +1,4 @@
-package bp.trainapp.models
+package bp.trainapp.model
 
 import com.github.nscala_time.time.Imports._
 import spray.json._
