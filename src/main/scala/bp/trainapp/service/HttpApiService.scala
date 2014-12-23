@@ -61,7 +61,8 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     path(API_ROUET_PREFIX / API_VERSION / "user") {
     	getJson {
     	  complete {
-		    	userRepository.list().map(list => list.map(u => u))
+		    	//userRepository.mapFuture(userRepository.list())
+		    	userRepository.list()
     	  }
     	}
   	}

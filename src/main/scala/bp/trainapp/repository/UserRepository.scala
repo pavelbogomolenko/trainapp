@@ -17,7 +17,6 @@ trait UserRepository {
   val collectionName = "trainapp.user"
     
   def list(): Future[List[User]] = {
-	  //val query = BSONDocument("user_id" -> 1)
 	  val query = BSONDocument()
 
 	  //getting a list
@@ -25,5 +24,9 @@ trait UserRepository {
 	    find(query).
 	    cursor[User].
 	    collect[List]()
+  }
+  
+  def mapFuture(fList: Future[List[User]]) = {
+  	fList.map(list => list.map(u => u))
   }
 }
