@@ -3,6 +3,7 @@ package bp.trainapp.service
 import reactivemongo.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+
 class MongoDbDriver(val host: String, val dbName: String) {
 	lazy val connect = {
 	  // gets an instance of the driver

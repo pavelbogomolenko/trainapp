@@ -10,7 +10,7 @@ case class User(
 		_id: Option[String],
 		email: String,
 		password: String,
-		registrationDate: Option[String]
+		created: Option[String] = Some(DateTime.now().toString())
     )
  
 object User {
@@ -20,7 +20,7 @@ object User {
   	  BSONDocument(
   	      "email"							-> BSONString(user.email),
   	      "password"					-> BSONString(user.password),
-  	      "registrationDate"	-> user.registrationDate.map(date => DateTime.parse(date).getMillis()))
+  	      "created"						-> user.created.map(date => DateTime.parse(date).getMillis()))
   	}
   }
   
@@ -30,7 +30,7 @@ object User {
 		      doc.get("_id").map(f => f.toString()),
 		      doc.getAs[String]("email").get,
 		      doc.getAs[String]("password").get,
-		      doc.getAs[String]("registrationDate").map(dt => new DateTime(dt).toString()))
+		      doc.getAs[String]("created").map(dt => new DateTime(dt).toString()))
     }
   }
 }

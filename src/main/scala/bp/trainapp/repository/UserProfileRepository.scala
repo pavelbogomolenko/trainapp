@@ -8,11 +8,10 @@ import org.joda.time.DateTime
 import reactivemongo.api._
 import reactivemongo.bson._
 
-import bp.trainapp.service.DbDriverComponent
+import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.UserProfile
 
-trait UserProfileRepository {
-  this: DbDriverComponent =>
+class UserProfileRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.userprofile"
   

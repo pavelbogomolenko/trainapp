@@ -10,12 +10,14 @@ import spray.routing._
 import spray.http._
 import spray.json._
 import spray.http.MediaTypes._
+import spray.http.StatusCodes
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
 import spray.routing.Directive.pimpApply
 import spray.httpx.SprayJsonSupport
 
-import bp.trainapp.repository.UserProfileRepository
-import bp.trainapp.repository.UserRepository
+import bp.trainapp.repository.RepositoryComponent
+
+import bp.trainapp.model.User
 
 import bp.trainapp.service._
 
@@ -51,11 +53,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     }
   }
   
-  val userProfileRepository = new UserProfileRepository with DbDriverComponent {
-    val db = new MongoDbDriver("localhost", "trainapp")
-  }
-  
-  val userRepository = new UserRepository with DbDriverComponent {
+  val repositoryComponent = new RepositoryComponent with DbDriverComponent {
     val db = new MongoDbDriver("localhost", "trainapp")
   }
   
@@ -67,7 +65,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	getJson {
     	  complete {
     	    import bp.trainapp.model.UserProfileJsonProtocol._
-    	    userProfileRepository.list()
+    	    repositoryComponent.userProfileRepository.list()
     	  }
     	}
   	} ~
@@ -75,7 +73,18 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	  getJson {
   	    complete {
   	      import bp.trainapp.model.UserJsonProtocol._
-  	      userRepository.list()
+  	      repositoryComponent.userRepository.list()
+  	    }
+  	  } ~
+  	  post {
+  	    import bp.trainapp.model.UserJsonProtocol._
+  	    entity(as[User]) { user =>
+        	log.debug("create new user")
+        	val newUser = repositoryComponent.userRepository.save(user)
+        	newUser match {
+        	  case onComplete => complete(StatusCodes.Created, "created")
+        	  case onFailure 	=> complete(StatusCodes.InternalServerError)
+        	}
   	    }
   	  }
   	}

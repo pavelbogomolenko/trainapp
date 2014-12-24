@@ -8,11 +8,10 @@ import org.joda.time.DateTime
 import reactivemongo.api._
 import reactivemongo.bson._
 
-import bp.trainapp.service.DbDriverComponent
+import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.User
 
-trait UserRepository {
-  this: DbDriverComponent =>
+class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.user"
   
@@ -25,4 +24,9 @@ trait UserRepository {
 	    cursor[User].
 	    collect[List]()
 	}
+  
+  def save(user: User) = {
+    db.collection(collectionName).
+    	insert(user)
+  }
 }
