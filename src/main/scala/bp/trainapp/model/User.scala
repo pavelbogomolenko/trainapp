@@ -10,7 +10,7 @@ case class User(
 		_id: Option[String],
 		email: String,
 		password: String,
-		created: Option[String] = Some(DateTime.now().toString())
+		created: String
     )
  
 object User {
@@ -20,7 +20,7 @@ object User {
   	  BSONDocument(
   	      "email"							-> BSONString(user.email),
   	      "password"					-> BSONString(user.password),
-  	      "created"						-> user.created.map(date => DateTime.parse(date).getMillis()))
+  	      "created"						-> BSONLong(DateTime.parse(user.created).getMillis()))
   	}
   }
   
@@ -28,9 +28,9 @@ object User {
     def read(doc: BSONDocument): User = {
 		  User(
 		      doc.get("_id").map(f => f.toString()),
-		      doc.getAs[String]("email").get,
-		      doc.getAs[String]("password").get,
-		      doc.getAs[String]("created").map(dt => new DateTime(dt).toString()))
+		      doc.getAs[BSONString]("email").get.value,
+		      doc.getAs[BSONString]("password").get.value,
+		      doc.getAs[BSONLong]("created").get.value.toDateTime.toString()) 
     }
   }
 }

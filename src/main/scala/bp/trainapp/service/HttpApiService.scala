@@ -6,6 +6,8 @@ import akka.actor.Actor
 
 import org.slf4j.LoggerFactory
 
+import org.joda.time.DateTime
+
 import spray.routing._
 import spray.http._
 import spray.json._
@@ -78,13 +80,22 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	  } ~
   	  post {
   	    import bp.trainapp.model.UserJsonProtocol._
-  	    entity(as[User]) { user =>
-        	log.debug("create new user")
-        	val newUser = repositoryComponent.userRepository.save(user)
-        	newUser match {
-        	  case onComplete => complete(StatusCodes.Created, "created")
-        	  case onFailure 	=> complete(StatusCodes.InternalServerError)
-        	}
+  	    formFields('email, 'password) { (email, password) =>
+  	      respondWithMediaType(`application/json`) {
+	  	      val user = User(_id = None, email = email, password = password, created = DateTime.now().toString())
+	  	      val res = repositoryComponent.userRepository.save(user)
+	  	      res match {
+	  	        case User => complete(StatusCodes.Created, """{"status": "ok"}""")
+	  	        case _ => complete(StatusCodes.InternalServerError)
+	  	      }
+  	      }
+  	    }
+  	  }
+  	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "login") {
+  	  formFields('email, 'password) { (email, password) =>
+  	    respondWithMediaType(`application/json`) {
+  	    	complete(StatusCodes.Unauthorized)
   	    }
   	  }
   	}
