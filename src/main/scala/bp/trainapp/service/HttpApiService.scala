@@ -1,5 +1,7 @@
 package bp.trainapp.service
 
+import scala.util.{Success, Failure}
+import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import akka.actor.Actor
@@ -18,6 +20,7 @@ import spray.routing.Directive.pimpApply
 import spray.httpx.SprayJsonSupport
 
 import bp.trainapp.repository.RepositoryComponent
+import bp.trainapp.repository.UserExistsException
 
 import bp.trainapp.model.User
 
@@ -82,12 +85,13 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	    import bp.trainapp.model.UserJsonProtocol._
   	    formFields('email, 'password) { (email, password) =>
   	      respondWithMediaType(`application/json`) {
-	  	      val user = User(_id = None, email = email, password = password, created = DateTime.now().toString())
+	  	      val user = User(_id = None, 
+	  	          email = email, password = password, created = DateTime.now().toString())
 	  	      val res = repositoryComponent.userRepository.save(user)
-	  	      res match {
-	  	        case User => complete(StatusCodes.Created, """{"status": "ok"}""")
-	  	        case _ => complete(StatusCodes.InternalServerError)
-	  	      }
+	  	      onComplete(res) {
+	  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+	  	        case Failure(e) => failWith(e)
+	  	      } 
   	      }
   	    }
   	  }

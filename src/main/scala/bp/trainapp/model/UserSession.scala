@@ -8,10 +8,10 @@ import reactivemongo.bson._
 
 case class UserSession(
 		_id: Option[String],
-		userId: Option[String],
-		session: String,
-		ip: String,
-		updated: Option[String]
+		userId: String,
+		sessionId: String,
+		ip: Option[String],
+		updated: String
     )
  
 object UserSession {
@@ -19,10 +19,10 @@ object UserSession {
   implicit object UserSessionWriter extends BSONDocumentWriter[UserSession] {
   	def write(userSession: UserSession): BSONDocument = { 
   	  BSONDocument(
-  	      "userId"	-> userSession.userId.map(id => BSONObjectID(id)),
-  	      "session"	-> BSONString(userSession.session),
-  	      "ip"			-> BSONString(userSession.ip),
-  	      "updated"	-> userSession.updated.map(date => DateTime.parse(date).getMillis()))
+  	      "userId"		-> BSONObjectID(userSession.userId),
+  	      "sessionId"	-> BSONString(userSession.sessionId),
+  	      "ip"				-> userSession.ip.getOrElse(""),
+  	      "updated"		-> BSONLong(DateTime.parse(userSession.updated).getMillis()))
   	}
   }
   
@@ -30,10 +30,10 @@ object UserSession {
     def read(doc: BSONDocument): UserSession = {
 		  UserSession(
 		      doc.get("_id").map(f => f.toString()),
-		      doc.getAs[String]("userId").map(f => f.toString()),
-		      doc.getAs[String]("session").get,
-		      doc.getAs[String]("ip").get,
-		      doc.getAs[String]("updated").map(dt => new DateTime(dt).toString()))
+		      doc.getAs[BSONString]("userId").get.value,
+		      doc.getAs[BSONString]("sessionId").get.value,
+		      doc.getAs[BSONString]("ip").map(f => f.toString()),
+		      doc.getAs[BSONLong]("updated").get.value.toDateTime.toString()) 
     }
   }
 }

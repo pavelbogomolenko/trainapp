@@ -1,5 +1,6 @@
 package bp.trainapp.repository
 
+import scala.util.{Try, Success, Failure}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -35,31 +36,38 @@ class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
         		"login" -> user.email,
         		"password" -> user.password))  
         db.collection(collectionName).update(selector, modifier)
-        user
       }
       case User(None, email, password, created) => {
-        val futureCount = countByLogin(email)
-        val f = futureCount.map { count =>
-        	if(count == 0) { 
-        	  db.collection(collectionName).insert(user)
-        	  user
-        	} else {
-        	  Future.failed[String](new UserExistsException("user exists"))
-        	}
+        val found = findByLogin(email)
+//        val tmp = found.map { f =>
+//          f match {
+//            case List(a) => {
+//              println("user exists")
+//              new UserExistsException("user exists")
+//              //Future.failed[String](new UserExistsException("user exists"))
+//            }
+//            case Nil => db.collection(collectionName).insert(user)
+//          }
+//        }
+        val tmp = found.map {
+          case Nil => db.collection(collectionName).insert(user)
+          case List(a) => {
+            Future.failed[String](throw new UserExistsException("user exists"))
+          }
         }
-        f
+        tmp
       }
     }
   }
   
-  def countByCredentials(login: String, password: String) = {
+  def findByCredentials(login: String, password: String) = {
     val query = BSONDocument("email" -> login, "password" -> password)
 		db.connect.command(Count(collectionName, Some(query)))
 	}
   
-  def countByLogin(login: String) = {
+  def findByLogin(login: String) = {
     val query = BSONDocument("email" -> login)
-		db.connect.command(Count(collectionName, Some(query)))
+		db.collection(collectionName).find(query).cursor[User].collect[List]()
 	}
 }
 
