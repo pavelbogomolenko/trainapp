@@ -15,13 +15,15 @@ class UserSessionRepository(override val db:MongoDbDriver) extends BaseRepositor
     
   val collectionName = "trainapp.usersession"
   
-	def list(): Future[List[UserSession]] = {
-	  val query = BSONDocument()
-	
+	def list(query:BSONDocument = BSONDocument()): Future[List[UserSession]] = {
 	  //getting a list
 	  db.collection(collectionName).
 	    find(query).
 	    cursor[UserSession].
 	    collect[List]()
 	}
+  
+  def save(userSession: UserSession) = {
+    db.collection(collectionName).insert(userSession)
+  }
 }

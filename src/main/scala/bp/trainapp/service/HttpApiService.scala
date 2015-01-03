@@ -23,6 +23,7 @@ import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserExistsException
 
 import bp.trainapp.model.User
+import bp.trainapp.model.UserSession
 
 import bp.trainapp.service._
 
@@ -60,6 +61,9 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   
   val repositoryComponent = new RepositoryComponent with DbDriverComponent {
     val db = new MongoDbDriver("localhost", "trainapp")
+  }
+  val authService= new AuthComponent with AuthService {
+    val repComp = repositoryComponent
   }
   
   /**
@@ -99,7 +103,14 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	path(API_ROUET_PREFIX / API_VERSION / "login") {
   	  formFields('email, 'password) { (email, password) =>
   	    respondWithMediaType(`application/json`) {
-  	    	complete(StatusCodes.Unauthorized)
+  	      val res = authService.auth(email, password)
+  	      onComplete(res) {
+	  	    	case Success(r) => {
+	  	    	  println(r)
+	  	    	  complete(StatusCodes.OK, "Success test")
+	  	    	} 
+	  	      case Failure(e) => complete(StatusCodes.Unauthorized)
+	  	    } 
   	    }
   	  }
   	}

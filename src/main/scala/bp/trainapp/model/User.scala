@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import reactivemongo.bson._
 
 case class User(
-		_id: Option[String],
+		_id: Option[Array[Byte]],
 		email: String,
 		password: String,
 		created: String
@@ -26,11 +26,13 @@ object User {
   
   implicit object UserReader extends BSONDocumentReader[User] {
     def read(doc: BSONDocument): User = {
+      println(BSONObjectID.unapply(doc.getAs[BSONObjectID]("_id").get).get)
 		  User(
-		      doc.get("_id").map(f => f.toString()),
+		      //doc.getAs[BSONObjectID]("_id").map(BSONObjectID.unapply(_).toString()),
+		      Some(BSONObjectID.unapply(doc.getAs[BSONObjectID]("_id").get).get),
 		      doc.getAs[BSONString]("email").get.value,
 		      doc.getAs[BSONString]("password").get.value,
-		      doc.getAs[BSONLong]("created").get.value.toDateTime.toString()) 
+		      doc.getAs[BSONLong]("created").get.value.toDateTime.toString())
     }
   }
 }

@@ -17,9 +17,7 @@ class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.user"
   
-	def list(): Future[List[User]] = {
-	  val query = BSONDocument()
-	
+	def list(query:BSONDocument = BSONDocument()): Future[List[User]] = {
 	  //getting a list
 	  db.collection(collectionName).
 	    find(query).
@@ -30,7 +28,8 @@ class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
   def save(user: User) = {   
     user match {
       case User(_id, _, _, _) if _id != None => {
-        val selector = BSONDocument("_id" -> user._id)
+        //val selector = BSONDocument("_id" -> user._id)
+        val selector = BSONDocument()
         val modifier = BSONDocument(
         "$set" -> BSONDocument(
         		"login" -> user.email,
@@ -38,36 +37,25 @@ class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
         db.collection(collectionName).update(selector, modifier)
       }
       case User(None, email, password, created) => {
-        val found = findByLogin(email)
-//        val tmp = found.map { f =>
-//          f match {
-//            case List(a) => {
-//              println("user exists")
-//              new UserExistsException("user exists")
-//              //Future.failed[String](new UserExistsException("user exists"))
-//            }
-//            case Nil => db.collection(collectionName).insert(user)
-//          }
-//        }
-        val tmp = found.map {
+        val found = findByLogin(email) map {
           case Nil => db.collection(collectionName).insert(user)
           case List(a) => {
             Future.failed[String](throw new UserExistsException("user exists"))
           }
         }
-        tmp
+        found
       }
     }
   }
   
   def findByCredentials(login: String, password: String) = {
     val query = BSONDocument("email" -> login, "password" -> password)
-		db.connect.command(Count(collectionName, Some(query)))
+		list(query)
 	}
   
   def findByLogin(login: String) = {
     val query = BSONDocument("email" -> login)
-		db.collection(collectionName).find(query).cursor[User].collect[List]()
+    list(query)
 	}
 }
 

@@ -26,7 +26,8 @@ libraryDependencies ++= {
     "org.specs2"				%%	"specs2-core"		%	"2.3.11" % "test",
     "com.github.nscala-time" 	%%	"nscala-time"		% 	"1.6.0",
     "org.reactivemongo" 		%%	"reactivemongo" 	%	"0.11.0-SNAPSHOT",
-    "ch.qos.logback"			%   "logback-classic"	% 	"1.0.13"
+    "ch.qos.logback"			%   "logback-classic"	% 	"1.0.13",
+    "commons-codec" 			%	"commons-codec"		% 	"1.10"
   )
 }
 

@@ -8,36 +8,42 @@ import reactivemongo.bson._
 
 case class UserSession(
 		_id: Option[String],
-		userId: String,
+		userId: Array[Byte],
 		sessionId: String,
-		ip: Option[String],
-		updated: String
-    )
+		ip: String = "",
+		updated: String,
+		expired: String = "")
  
 object UserSession {
   
   implicit object UserSessionWriter extends BSONDocumentWriter[UserSession] {
   	def write(userSession: UserSession): BSONDocument = { 
-  	  BSONDocument(
-  	      "userId"		-> BSONObjectID(userSession.userId),
-  	      "sessionId"	-> BSONString(userSession.sessionId),
-  	      "ip"				-> userSession.ip.getOrElse(""),
-  	      "updated"		-> BSONLong(DateTime.parse(userSession.updated).getMillis()))
+  	  println("write")
+//  	  BSONDocument(
+//  	      "userId"		-> BSONString(userSession.userId),
+//  	      "sessionId"	-> BSONString(userSession.sessionId),
+//  	      "ip"				-> BSONString(userSession.ip),
+//  	      "updated"		-> BSONLong(DateTime.parse(userSession.updated).getMillis()),
+//  	      "expired" 	-> BSONLong(DateTime.parse(userSession.expired).getMillis()))
+  	  BSONDocument("userId"		-> BSONObjectID(userSession.userId))
   	}
   }
   
   implicit object UserSessionReader extends BSONDocumentReader[UserSession] {
     def read(doc: BSONDocument): UserSession = {
+      println("read")
 		  UserSession(
 		      doc.get("_id").map(f => f.toString()),
-		      doc.getAs[BSONString]("userId").get.value,
+		      //doc.getAs[BSONObjectID]("userId"),
+		      BSONObjectID.unapply(doc.getAs[BSONObjectID]("userId").get).get,
 		      doc.getAs[BSONString]("sessionId").get.value,
-		      doc.getAs[BSONString]("ip").map(f => f.toString()),
-		      doc.getAs[BSONLong]("updated").get.value.toDateTime.toString()) 
+		      doc.getAs[BSONString]("ip").get.value,
+		      doc.getAs[BSONLong]("updated").get.value.toDateTime.toString(),
+		      doc.getAs[BSONLong]("expired").get.value.toDateTime.toString()) 
     }
   }
 }
 
 object UserSessionJsonProtocol extends DefaultJsonProtocol {
-  implicit val userSessionJsonFormat = jsonFormat5(UserSession.apply)
+  implicit val userSessionJsonFormat = jsonFormat6(UserSession.apply)
 }
