@@ -23,8 +23,7 @@ object UserSession {
   	      "sessionId"	-> BSONString(userSession.sessionId),
   	      "ip"				-> userSession.ip,
   	      "updated"		-> BSONLong(DateTime.parse(userSession.updated).getMillis()),
-  	      "expired" 	-> userSession.expired.map(DateTime.parse(_).getMillis())
-  	      )
+  	      "expired" 	-> userSession.expired.map(DateTime.parse(_).getMillis()))
   	}
   }
   
