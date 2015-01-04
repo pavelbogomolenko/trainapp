@@ -11,17 +11,7 @@ import reactivemongo.bson._
 import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.UserProfile
 
-class UserProfileRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
+class UserProfileRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.userprofile"
-  
-	def list(): Future[List[UserProfile]] = {
-	  val query = BSONDocument()
-	
-	  //getting a list
-	  db.collection(collectionName).
-	    find(query).
-	    cursor[UserProfile].
-	    collect[List]()
-	}
 }

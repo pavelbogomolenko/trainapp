@@ -6,6 +6,8 @@ import spray.json._
 
 import reactivemongo.bson._
 
+case class BaseModel(_id: Option[BSONObjectID])
+
 object BaseModel {
 	implicit object BSONObjectIDFormat extends RootJsonFormat[BSONObjectID] {
 	  def write(objectId: BSONObjectID): JsValue = JsString(objectId.toString())
@@ -20,4 +22,9 @@ object BaseModel {
 	    case _ => throw new DeserializationException("Expected BSONObjectID as JsString")
 	  }
 	}
+}
+
+object BaseModelJsonProtocol extends DefaultJsonProtocol {
+  import bp.trainapp.model.BaseModel.BSONObjectIDFormat
+  implicit val baseModelJsonFormat = jsonFormat1(BaseModel.apply)
 }

@@ -22,8 +22,7 @@ import spray.httpx.SprayJsonSupport
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserExistsException
 
-import bp.trainapp.model.User
-import bp.trainapp.model.UserSession
+import bp.trainapp.model._
 
 import bp.trainapp.service._
 
@@ -74,7 +73,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	getJson {
     	  complete {
     	    import bp.trainapp.model.UserProfileJsonProtocol._
-    	    repositoryComponent.userProfileRepository.list()
+    	    repositoryComponent.userProfileRepository.list[UserProfile]()
     	  }
     	}
   	} ~
@@ -82,7 +81,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	  getJson {
   	    complete {
   	      import bp.trainapp.model.UserJsonProtocol._
-  	      repositoryComponent.userRepository.list()
+  	      repositoryComponent.userRepository.list[User]()
   	    }
   	  } ~
   	  post {
@@ -118,7 +117,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	getJson {
     	  complete {
     	  	import bp.trainapp.model.UserSessionJsonProtocol._
-    	    repositoryComponent.userSessionRepository.list()
+    	    repositoryComponent.userSessionRepository.list[UserSession]()
     	  }
     	}
   	}

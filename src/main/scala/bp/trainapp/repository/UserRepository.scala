@@ -13,17 +13,9 @@ import reactivemongo.core.commands.Count
 import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.User
 
-class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
+class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.user"
-  
-	def list(query:BSONDocument = BSONDocument()): Future[List[User]] = {
-	  //getting a list
-	  db.collection(collectionName).
-	    find(query).
-	    cursor[User].
-	    collect[List]()
-	}
   
   def save(user: User) = {   
     user match {
@@ -48,14 +40,14 @@ class UserRepository(override val db:MongoDbDriver) extends BaseRepository(db) {
     }
   }
   
-  def findByCredentials(login: String, password: String) = {
+  def findByCredentials[T](login: String, password: String)(implicit reader:BSONDocumentReader[T]) = {
     val query = BSONDocument("email" -> login, "password" -> password)
-		list(query)
+		list[T](query)
 	}
   
-  def findByLogin(login: String) = {
+  def findByLogin[T](login: String)(implicit reader:BSONDocumentReader[T]) = {
     val query = BSONDocument("email" -> login)
-    list(query)
+    list[T](query)
 	}
 }
 

@@ -13,6 +13,7 @@ import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserNotFoundException
 
 import bp.trainapp.model.UserSession
+import bp.trainapp.model.User
 
 import bp.trainapp.service._
 
@@ -26,7 +27,7 @@ trait AuthService {
 	}
 	
 	def auth(login: String, password: String) = {
-		val result = repComp.userRepository.findByCredentials(login, password)
+		val result = repComp.userRepository.findByCredentials[User](login, password)
 		result map {
 			case Nil => Future.failed[String](throw new UserNotFoundException("user not found"))
       case List(user) => {

@@ -15,8 +15,7 @@ case class UserProfile(
 		gender: String, 
 		height: Double, 
 		weight: Double, 
-		registrationDate: Option[String]
-    )
+		registrationDate: Option[String])
  
 object UserProfile {
   
