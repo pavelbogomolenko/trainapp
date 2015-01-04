@@ -34,9 +34,9 @@ trait AuthService {
             _id = None,
             userId = user._id.get,
             sessionId = generateToken,
-            ip = "",
+            ip = None,
             updated = DateTime.now().toString(), 
-            expired = "")
+            expired = None)
         println(userSession)
         repComp.userSessionRepository.save(userSession)    
       }

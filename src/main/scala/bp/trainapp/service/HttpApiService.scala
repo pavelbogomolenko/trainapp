@@ -113,5 +113,13 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
 	  	    } 
   	    }
   	  }
+  	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "usersession") {
+    	getJson {
+    	  complete {
+    	  	import bp.trainapp.model.UserSessionJsonProtocol._
+    	    repositoryComponent.userSessionRepository.list()
+    	  }
+    	}
   	}
 }
