@@ -26,7 +26,7 @@ trait AuthService {
 	  DigestUtils.sha1Hex(sha1ArrayByte)
 	}
 	
-	def auth(login: String, password: String) = {
+	def login(login: String, password: String) = {
 		val result = repComp.userRepository.findByCredentials[User](login, password)
 		result map {
 			case Nil => Future.failed[String](throw new UserNotFoundException("user not found"))
@@ -38,10 +38,18 @@ trait AuthService {
             ip = None,
             updated = DateTime.now().toString(), 
             expired = None)
-        println(userSession)
-        repComp.userSessionRepository.save(userSession)    
+        repComp.userSessionRepository.save(userSession)
+        userSession
       }
 		}
+	}
+	
+	def validateSession(sessionId: String) = {
+  	val result = repComp.userSessionRepository.findBySesseionId[UserSession](sessionId)
+  	result map {
+  		case Nil => Future.failed[String](throw new UserNotFoundException("session not valid or expired"))
+  		case List(userSession) => userSession
+  	}
 	}
 }
 

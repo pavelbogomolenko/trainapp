@@ -18,4 +18,12 @@ class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseReposi
   def save(userSession: UserSession) = {
     db.collection(collectionName).insert(userSession)
   }
+  
+  def findBySesseionId[T](sessionId: String)(implicit reader:BSONDocumentReader[T]) = {
+    /**
+     * @to-do implement proper session validation (expiration and etc)
+     */
+    val query = BSONDocument("sessionId" -> sessionId)
+    list[T](query)
+	}
 }

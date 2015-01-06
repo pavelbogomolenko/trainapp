@@ -12,12 +12,15 @@ import org.joda.time.DateTime
 
 import spray.routing._
 import spray.http._
-import spray.json._
+import spray.http.HttpHeaders.RawHeader
 import spray.http.MediaTypes._
 import spray.http.StatusCodes
 import spray.httpx.marshalling.ToResponseMarshallable.isMarshallable
-import spray.routing.Directive.pimpApply
 import spray.httpx.SprayJsonSupport
+import spray.json._
+import spray.routing.Directive.pimpApply
+
+import spray.routing.authentication.UserPass
 
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserExistsException
@@ -58,6 +61,16 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     }
   }
   
+  def auth(route: Route): Route = {
+     headerValueByName("X-Auth") { sessionId =>
+       val res = authService.validateSession(sessionId)
+       onComplete(res) {
+         case Success(r:UserSession) => route
+         case Failure(e) => failWith(e)
+       }
+    }
+  }
+  
   val repositoryComponent = new RepositoryComponent with DbDriverComponent {
     val db = new MongoDbDriver("localhost", "trainapp")
   }
@@ -79,9 +92,11 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "user") {
   	  getJson {
-  	    complete {
-  	      import bp.trainapp.model.UserJsonProtocol._
-  	      repositoryComponent.userRepository.list[User]()
+  	    auth {
+  	      complete {
+  	      	import bp.trainapp.model.UserJsonProtocol._
+  	      	repositoryComponent.userRepository.list[User]()
+  	      }
   	    }
   	  } ~
   	  post {
@@ -102,11 +117,12 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	path(API_ROUET_PREFIX / API_VERSION / "login") {
   	  formFields('email, 'password) { (email, password) =>
   	    respondWithMediaType(`application/json`) {
-  	      val res = authService.auth(email, password)
+  	      val res = authService.login(email, password)
   	      onComplete(res) {
-	  	    	case Success(r) => {
-	  	    	  println(r)
-	  	    	  complete(StatusCodes.OK, "Success test")
+	  	    	case Success(r:UserSession) => {
+	  	    	  respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
+	  	    	  	complete(StatusCodes.OK, "Success test")
+	  	    	  }
 	  	    	} 
 	  	      case Failure(e) => complete(StatusCodes.Unauthorized)
 	  	    } 
