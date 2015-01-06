@@ -1,3 +1,3 @@
 # trainapp 
 
-REST API based on Spray.io
+REST API application based on Spray.io
