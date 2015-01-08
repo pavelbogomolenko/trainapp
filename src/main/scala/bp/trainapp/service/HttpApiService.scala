@@ -100,7 +100,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	    }
   	  } ~
   	  post {
-  	    import bp.trainapp.model.UserJsonProtocol._
+  	    //import bp.trainapp.model.UserJsonProtocol._
   	    formFields('email, 'password) { (email, password) =>
   	      respondWithMediaType(`application/json`) {
 	  	      val user = User(_id = None, 
@@ -136,5 +136,28 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	    repositoryComponent.userSessionRepository.list[UserSession]()
     	  }
     	}
+  	} ~ 
+  	path(API_ROUET_PREFIX / API_VERSION / "deviceattribute") {
+  	  auth {
+	  	  getJson {
+	    	  complete {
+	    	  	import bp.trainapp.model.DeviceAttributeJsonProtocol._
+	    	    repositoryComponent.attributeRepository.list[DeviceAttribute]()
+	    	  }
+	    	} ~
+	    	post{
+	  	    formFields('title) { (title) =>
+	  	    	respondWithMediaType(`application/json`) {
+		  	      val attribute = DeviceAttribute(_id = None, 
+		  	          title = title, created = DateTime.now().toString())
+		  	      val res = repositoryComponent.attributeRepository.save(attribute)
+		  	      onComplete(res) {
+		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+		  	        case Failure(e) => failWith(e)
+		  	      } 
+	  	    	}
+	  	    }
+	    	}
+  	  }
   	}
 }

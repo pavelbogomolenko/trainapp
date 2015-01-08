@@ -13,7 +13,6 @@ import reactivemongo.bson.{BSONReader, BSONWriter}
 case class DeviceAttribute(
     _id: Option[BSONObjectID],
 		title: String,
-		value: String,
 		created: String)
 		
 object DeviceAttribute {
@@ -21,8 +20,7 @@ object DeviceAttribute {
   	def write(attr: DeviceAttribute): BSONDocument = { 
   	  BSONDocument(
   	      "title"							-> BSONString(attr.title),
-  	      "value"							-> BSONString(attr.value),
-  	      "atributes"					-> BSONLong(DateTime.parse(attr.created).getMillis()))
+  	      "created"						-> BSONLong(DateTime.parse(attr.created).getMillis()))
   	}
   }
 
@@ -31,7 +29,6 @@ object DeviceAttribute {
 		  DeviceAttribute(
 		      doc.getAs[BSONObjectID]("_id"),
 		      doc.getAs[BSONString]("title").get.value,
-		      doc.getAs[BSONString]("value").get.value,
 		      doc.getAs[BSONLong]("created").get.value.toDateTime.toString())
     }
   }
@@ -39,7 +36,7 @@ object DeviceAttribute {
 
 object DeviceAttributeJsonProtocol extends DefaultJsonProtocol {
   import bp.trainapp.model.BaseModel._
-  implicit val deviceAttributeJsonFormat = jsonFormat4(DeviceAttribute.apply)
+  implicit val deviceAttributeJsonFormat = jsonFormat3(DeviceAttribute.apply)
 }
 
 /**
@@ -49,7 +46,7 @@ case class Device(
 		_id: Option[BSONObjectID],
 		title: String,
 		created: String,
-		atributes: Option[List[DeviceAttribute]])
+		atributes: Option[List[BSONObjectID]])
  
 object Device {
   
@@ -68,7 +65,7 @@ object Device {
 		      doc.getAs[BSONObjectID]("_id"),
 		      doc.getAs[BSONString]("title").get.value,
 		      doc.getAs[BSONLong]("created").get.value.toDateTime.toString(),
-		      Some(doc.getAs[List[DeviceAttribute]]("atributes").get))
+		      Some(doc.getAs[List[BSONObjectID]]("atributes").get))
     }
   }
 }
@@ -77,4 +74,40 @@ object DeviceJsonProtocol extends DefaultJsonProtocol {
   import  bp.trainapp.model.DeviceAttributeJsonProtocol._
   import bp.trainapp.model.BaseModel._
   implicit val deviceJsonFormat = jsonFormat4(Device.apply)
+}
+
+/**
+ * DeviceAttributeValue model
+ * Hold relation between device and attribute values
+ */
+case class DeviceAttributeValue(
+    _id: Option[BSONObjectID],
+    deviceId: BSONObjectID,
+    attributeId: BSONObjectID,
+    value: String)
+    
+object DeviceAttributeValue {
+	implicit object DeviceAttributeValueWriter extends BSONDocumentWriter[DeviceAttributeValue] {
+  	def write(attrValue: DeviceAttributeValue): BSONDocument = { 
+  	  BSONDocument(
+  	      "deviceId"					-> attrValue.deviceId,
+  	      "attributeId"				-> attrValue.attributeId,
+  	      "value"							-> BSONString(attrValue.value))
+  	}
+  }
+
+  implicit object DeviceAttributeValueReader extends BSONDocumentReader[DeviceAttributeValue] {
+    def read(doc: BSONDocument): DeviceAttributeValue = {
+		  DeviceAttributeValue(
+		      doc.getAs[BSONObjectID]("_id"),
+		      doc.getAs[BSONObjectID]("deviceId").get,
+		      doc.getAs[BSONObjectID]("attributeId").get,
+		      doc.getAs[BSONString]("value").get.value)
+    }
+  }
+}
+    
+object DeviceAttributeValueJsonProtocol extends DefaultJsonProtocol {
+  import bp.trainapp.model.BaseModel._
+  implicit val deviceAttributeValueJsonFormat = jsonFormat4(DeviceAttributeValue.apply)
 }
