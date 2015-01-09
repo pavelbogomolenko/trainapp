@@ -20,6 +20,8 @@ import spray.httpx.SprayJsonSupport
 import spray.json._
 import spray.routing.Directive.pimpApply
 
+import reactivemongo.bson._
+
 import spray.routing.authentication.UserPass
 
 import bp.trainapp.repository.RepositoryComponent
@@ -42,7 +44,6 @@ class HttpApiServiceActor extends Actor with HttpApiService {
   // or timeout handling
   def receive = runRoute(myRoute)
 }
-
 
 // this trait defines our service behavior independently from the service actor
 trait HttpApiService extends HttpService with SprayJsonSupport {
@@ -151,6 +152,57 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
 		  	      val attribute = DeviceAttribute(_id = None, 
 		  	          title = title, created = DateTime.now().toString())
 		  	      val res = repositoryComponent.attributeRepository.save(attribute)
+		  	      onComplete(res) {
+		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+		  	        case Failure(e) => failWith(e)
+		  	      } 
+	  	    	}
+	  	    }
+	    	}
+  	  }
+  	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "device") {
+  	  auth {
+//	  	  getJson {
+//	    	  complete {
+//	    	  	import bp.trainapp.model.DeviceJsonProtocol._
+//	    	    repositoryComponent.deviceRepository.list[Device]()
+//	    	  }
+//	    	} ~
+	    	post {
+	    	  import bp.trainapp.model.DeviceJsonProtocol._
+	    		entity(as[Device]) { (device) =>
+	  	    	//respondWithMediaType(`application/json`) {
+	  	    	  println(device)
+	  	    	  complete(StatusCodes.Created, """{"status": "ok"}""") 
+//	  	    	  val attr = Some(atributes.split(",").map(BSONObjectID(_)).toList)
+//		  	      val device = Device(_id = None, 
+//		  	          title = title, created = DateTime.now().toString(), atributes = attr)
+//		  	      val res = repositoryComponent.deviceRepository.save(device)
+//		  	      onComplete(res) {
+//		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+//		  	        case Failure(e) => failWith(e)
+//		  	      } 
+	  	    	//}
+	  	    }
+	    	}
+  	  }
+  	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "deviceattributevalue") {
+  	  auth {
+	  	  getJson {
+	    	  complete {
+	    	  	import bp.trainapp.model.DeviceAttributeValueJsonProtocol._
+	    	    repositoryComponent.deviceAttributeRepository.list[DeviceAttributeValue]()
+	    	  }
+	    	} ~
+	    	post{
+	  	    formFields('title, 'atributes) { (title, atributes) =>
+	  	    	respondWithMediaType(`application/json`) {
+	  	    	  val attr = Some(atributes.split(",").map(BSONObjectID(_)).toList)
+		  	      val device = Device(_id = None, 
+		  	          title = title, created = DateTime.now().toString(), atributes = attr)
+		  	      val res = repositoryComponent.deviceRepository.save(device)
 		  	      onComplete(res) {
 		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
 		  	        case Failure(e) => failWith(e)
