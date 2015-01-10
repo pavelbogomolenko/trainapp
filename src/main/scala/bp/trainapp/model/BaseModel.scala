@@ -6,9 +6,13 @@ import spray.json._
 
 import reactivemongo.bson._
 
-case class BaseModel(_id: Option[BSONObjectID])
+import org.joda.time.DateTime
+import com.github.nscala_time.time.Imports._
 
 object BaseModel {
+  /**
+   * implicit marshaling from and to BSONObjectID
+   */
 	implicit object BSONObjectIDFormat extends RootJsonFormat[BSONObjectID] {
 	  def write(objectId: BSONObjectID): JsValue = JsString(objectId.toString())
 	  def read(json: JsValue) = json match {
@@ -22,9 +26,14 @@ object BaseModel {
 	    case _ => throw new DeserializationException("Expected BSONObjectID as JsString")
 	  }
 	}
-}
-
-object BaseModelJsonProtocol extends DefaultJsonProtocol {
-  import bp.trainapp.model.BaseModel.BSONObjectIDFormat
-  implicit val baseModelJsonFormat = jsonFormat1(BaseModel.apply)
+	/**
+	 * implicit marshaling from and to DateTime
+	 */
+	implicit object DateTimeFormat extends RootJsonFormat[DateTime] {
+		def write(dt: DateTime): JsValue = JsString(dt.toString())
+		def read(json: JsValue) = json match {
+		  case JsNumber(dt) => dt.toLong.toDateTime
+		  case _ => throw new DeserializationException("Expected DateTime as JsNumber")
+		}
+	}
 }

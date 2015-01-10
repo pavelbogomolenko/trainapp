@@ -12,31 +12,28 @@ import reactivemongo.core.commands.Count
 
 import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.User
+import bp.trainapp.model.UserClass
 
 class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
     
   val collectionName = "trainapp.user"
   
-  def save(user: User) = {   
-    user match {
-      case User(_id, _, _, _) if _id != None => {
-        //val selector = BSONDocument("_id" -> user._id)
-        val selector = BSONDocument()
-        val modifier = BSONDocument(
-        "$set" -> BSONDocument(
-        		"login" -> user.email,
-        		"password" -> user.password))  
-        db.collection(collectionName).update(selector, modifier)
+  def save(user: User) = user match {
+    case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {
+      //val selector = BSONDocument("_id" -> user._id)
+      val selector = BSONDocument()
+      val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+      		"login" -> user.email,
+      		"password" -> user.password))  
+      db.collection(collectionName).update(selector, modifier)
+    }
+    case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
+      val found = findByLogin(email) map {
+        case Nil => db.collection(collectionName).insert(user)
+        case List(a) => Future.failed[String](throw new UserExistsException("user exists"))
       }
-      case User(None, email, password, created) => {
-        val found = findByLogin(email) map {
-          case Nil => db.collection(collectionName).insert(user)
-          case List(a) => {
-            Future.failed[String](throw new UserExistsException("user exists"))
-          }
-        }
-        found
-      }
+      found
     }
   }
   
@@ -49,6 +46,21 @@ class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db
     val query = BSONDocument("email" -> login)
     list[T](query)
 	}
+  
+  def createFromUserClass(u: UserClass) = {
+  	val user = User(
+  	    _id = None, 
+  	    email = u.email, 
+  	    password = u.password,
+  	    firstName = None, 
+  	    lastName = None, 
+				age = None, 
+				gender = None, 
+				height = None, 
+				weight = None,
+  	    created = DateTime.now())
+    save(user)
+  }
 }
 
 class UserNotFoundException(message: String) extends Exception(message)

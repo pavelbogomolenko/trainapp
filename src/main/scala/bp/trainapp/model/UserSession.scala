@@ -1,9 +1,10 @@
 package bp.trainapp.model
 
-import com.github.nscala_time.time.Imports._
 import spray.json._
 
 import org.joda.time.DateTime
+import com.github.nscala_time.time.Imports._
+
 import reactivemongo.bson._
 
 case class UserSession(
@@ -11,8 +12,8 @@ case class UserSession(
 		userId: BSONObjectID,
 		sessionId: String,
 		ip: Option[String],
-		updated: String,
-		expired: Option[String])
+		updated: DateTime,
+		expired: Option[DateTime])
  
 object UserSession {
   
@@ -22,8 +23,8 @@ object UserSession {
   	      "userId"		-> userSession.userId,
   	      "sessionId"	-> BSONString(userSession.sessionId),
   	      "ip"				-> userSession.ip,
-  	      "updated"		-> BSONLong(DateTime.parse(userSession.updated).getMillis()),
-  	      "expired" 	-> userSession.expired.map(DateTime.parse(_).getMillis()))
+  	      "updated"		-> userSession.updated.getMillis(),
+  	      "expired" 	-> userSession.expired.map(_.getMillis()))
   	}
   }
   
@@ -34,8 +35,8 @@ object UserSession {
 		      doc.getAs[BSONObjectID]("userId").get,
 		      doc.getAs[BSONString]("sessionId").get.value,
 		      doc.getAs[BSONString]("ip").map(_.toString()),
-		      doc.getAs[BSONLong]("updated").get.value.toDateTime.toString(),
-		      doc.getAs[BSONLong]("expired").map(_.toString().toDateTime.toString())) 
+		      doc.getAs[BSONLong]("updated").get.value.toDateTime,
+		      doc.getAs[BSONLong]("expired").map(_.value.toDateTime)) 
     }
   }
 }

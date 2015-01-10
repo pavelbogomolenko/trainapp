@@ -13,12 +13,10 @@ import bp.trainapp.model._
 trait RepositoryComponent {
 	this: DbDriverComponent =>
 	
-	lazy val userProfileRepository = new UserProfileRepository[UserProfile](db)
 	lazy val userRepository = new UserRepository[User](db)
 	lazy val userSessionRepository = new UserSessionRepository[UserSession](db)
 	lazy val attributeRepository = new DeviceAttributeRepository[DeviceAttribute](db)
 	lazy val deviceRepository = new DeviceRepository[Device](db)
-	lazy val deviceAttributeRepository = new DeviceAttributeValueRepository[DeviceAttributeValue](db)
 }
 
 abstract class BaseRepository[T](val db:MongoDbDriver) { 

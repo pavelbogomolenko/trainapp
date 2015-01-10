@@ -22,8 +22,6 @@ import spray.routing.Directive.pimpApply
 
 import reactivemongo.bson._
 
-import spray.routing.authentication.UserPass
-
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserExistsException
 
@@ -83,14 +81,6 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
    * routes definition
    */
   val myRoute = 
-    path(API_ROUET_PREFIX / API_VERSION / "userprofile") {
-    	getJson {
-    	  complete {
-    	    import bp.trainapp.model.UserProfileJsonProtocol._
-    	    repositoryComponent.userProfileRepository.list[UserProfile]()
-    	  }
-    	}
-  	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "user") {
   	  getJson {
   	    auth {
@@ -101,12 +91,10 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	    }
   	  } ~
   	  post {
-  	    //import bp.trainapp.model.UserJsonProtocol._
-  	    formFields('email, 'password) { (email, password) =>
+  	    import bp.trainapp.model.UserClassJsonProtocol._
+  	    entity(as[UserClass]) { (u) =>
   	      respondWithMediaType(`application/json`) {
-	  	      val user = User(_id = None, 
-	  	          email = email, password = password, created = DateTime.now().toString())
-	  	      val res = repositoryComponent.userRepository.save(user)
+	  	      val res = repositoryComponent.userRepository.createFromUserClass(u)
 	  	      onComplete(res) {
 	  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
 	  	        case Failure(e) => failWith(e)
@@ -116,13 +104,14 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	  }
   	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "login") {
-  	  formFields('email, 'password) { (email, password) =>
+  	  import bp.trainapp.model.UserClassJsonProtocol._
+  	  entity(as[UserClass]) { (u) =>
   	    respondWithMediaType(`application/json`) {
-  	      val res = authService.login(email, password)
+  	      val res = authService.login(u.email, u.password)
   	      onComplete(res) {
 	  	    	case Success(r:UserSession) => {
 	  	    	  respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
-	  	    	  	complete(StatusCodes.OK, "Success test")
+	  	    	  	complete(StatusCodes.NoContent)
 	  	    	  }
 	  	    	} 
 	  	      case Failure(e) => complete(StatusCodes.Unauthorized)
@@ -138,29 +127,6 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
     	  }
     	}
   	} ~ 
-  	path(API_ROUET_PREFIX / API_VERSION / "deviceattribute") {
-  	  auth {
-	  	  getJson {
-	    	  complete {
-	    	  	import bp.trainapp.model.DeviceAttributeJsonProtocol._
-	    	    repositoryComponent.attributeRepository.list[DeviceAttribute]()
-	    	  }
-	    	} ~
-	    	post{
-	  	    formFields('title) { (title) =>
-	  	    	respondWithMediaType(`application/json`) {
-		  	      val attribute = DeviceAttribute(_id = None, 
-		  	          title = title, created = DateTime.now().toString())
-		  	      val res = repositoryComponent.attributeRepository.save(attribute)
-		  	      onComplete(res) {
-		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
-		  	        case Failure(e) => failWith(e)
-		  	      } 
-	  	    	}
-	  	    }
-	    	}
-  	  }
-  	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "device") {
   	  auth {
 //	  	  getJson {
@@ -184,30 +150,6 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
 //		  	        case Failure(e) => failWith(e)
 //		  	      } 
 	  	    	//}
-	  	    }
-	    	}
-  	  }
-  	} ~
-  	path(API_ROUET_PREFIX / API_VERSION / "deviceattributevalue") {
-  	  auth {
-	  	  getJson {
-	    	  complete {
-	    	  	import bp.trainapp.model.DeviceAttributeValueJsonProtocol._
-	    	    repositoryComponent.deviceAttributeRepository.list[DeviceAttributeValue]()
-	    	  }
-	    	} ~
-	    	post{
-	  	    formFields('title, 'atributes) { (title, atributes) =>
-	  	    	respondWithMediaType(`application/json`) {
-	  	    	  val attr = Some(atributes.split(",").map(BSONObjectID(_)).toList)
-		  	      val device = Device(_id = None, 
-		  	          title = title, created = DateTime.now().toString(), atributes = attr)
-		  	      val res = repositoryComponent.deviceRepository.save(device)
-		  	      onComplete(res) {
-		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
-		  	        case Failure(e) => failWith(e)
-		  	      } 
-	  	    	}
 	  	    }
 	    	}
   	  }
