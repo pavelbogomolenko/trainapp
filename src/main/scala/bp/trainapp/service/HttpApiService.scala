@@ -129,27 +129,22 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	} ~ 
   	path(API_ROUET_PREFIX / API_VERSION / "device") {
   	  auth {
-//	  	  getJson {
-//	    	  complete {
-//	    	  	import bp.trainapp.model.DeviceJsonProtocol._
-//	    	    repositoryComponent.deviceRepository.list[Device]()
-//	    	  }
-//	    	} ~
+	  	  getJson {
+	    	  complete {
+	    	  	import bp.trainapp.model.DeviceJsonProtocol._
+	    	    repositoryComponent.deviceRepository.list[Device]()
+	    	  }
+	    	} ~
 	    	post {
-	    	  import bp.trainapp.model.DeviceJsonProtocol._
-	    		entity(as[Device]) { (device) =>
-	  	    	//respondWithMediaType(`application/json`) {
-	  	    	  println(device)
-	  	    	  complete(StatusCodes.Created, """{"status": "ok"}""") 
-//	  	    	  val attr = Some(atributes.split(",").map(BSONObjectID(_)).toList)
-//		  	      val device = Device(_id = None, 
-//		  	          title = title, created = DateTime.now().toString(), atributes = attr)
-//		  	      val res = repositoryComponent.deviceRepository.save(device)
-//		  	      onComplete(res) {
-//		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
-//		  	        case Failure(e) => failWith(e)
-//		  	      } 
-	  	    	//}
+	    	  import bp.trainapp.model.DeviceClassJsonProtocol._
+	    		entity(as[DeviceClass]) { (device) =>
+	  	    	respondWithMediaType(`application/json`) {
+		  	      val res = repositoryComponent.deviceRepository.createFromDeviceClass(device)
+		  	      onComplete(res) {
+		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+		  	        case Failure(e) => failWith(e)
+		  	      } 
+	  	    	}
 	  	    }
 	    	}
   	  }

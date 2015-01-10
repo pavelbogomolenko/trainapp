@@ -15,7 +15,6 @@ trait RepositoryComponent {
 	
 	lazy val userRepository = new UserRepository[User](db)
 	lazy val userSessionRepository = new UserSessionRepository[UserSession](db)
-	lazy val attributeRepository = new DeviceAttributeRepository[DeviceAttribute](db)
 	lazy val deviceRepository = new DeviceRepository[Device](db)
 }
 
