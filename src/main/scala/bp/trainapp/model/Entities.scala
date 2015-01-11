@@ -2,9 +2,13 @@ package bp.trainapp.model
 
 import spray.json._
 
+import reactivemongo.bson._
+
 import org.joda.time.DateTime
 
-case class UserClass(email: String, password: String)
+abstract class Entity
+
+case class UserClass(email: String, password: String) extends Entity
 
 case class UserProfileClass(
     firstName: Option[String], 
@@ -12,11 +16,16 @@ case class UserProfileClass(
 		age: Option[Double], 
 		gender: Option[String], 
 		height: Option[Double], 
-		weight: Option[Double])
+		weight: Option[Double]) extends Entity
 		
 case class DeviceClass(
     title: String,
-    attributes: Option[List[DeviceAttribute]])
+    attributes: Option[List[DeviceAttribute]]) extends Entity
+    
+case class DeviceUpdateClass(
+    id: BSONObjectID,
+    title: String,
+    attributes: Option[List[DeviceAttribute]]) extends Entity
 		
 		
 object UserClassJsonProtocol extends DefaultJsonProtocol {
@@ -30,4 +39,10 @@ object UserProfileClassJsonProtocol extends DefaultJsonProtocol {
 object DeviceClassJsonProtocol extends DefaultJsonProtocol {
   import	bp.trainapp.model.DeviceAttributeJsonProtocol._
   implicit val deviceClassJsonFormat = jsonFormat2(DeviceClass)
+}
+
+object DeviceUpdateClassJsonProtocol extends DefaultJsonProtocol {
+  import bp.trainapp.model.BaseModel._
+  import	bp.trainapp.model.DeviceAttributeJsonProtocol._
+  implicit val deviceUpdateClassJsonFormat = jsonFormat3(DeviceUpdateClass)
 }

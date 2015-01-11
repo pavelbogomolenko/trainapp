@@ -19,6 +19,7 @@ import bp.trainapp.service._
 
 trait AuthService {
   val repComp: RepositoryComponent
+  val sessionLifetime: Long
     
 	def generateToken: String = {
 	  val token = UUID.randomUUID().toString() + "-" + DateTime.now().getMillis()
@@ -44,11 +45,8 @@ trait AuthService {
 		}
 	}
 	
-	/**
-	 * @to-do added more check (expiration date,)
-	 */
 	def validateSession(sessionId: String): Future[UserSession] = {
-  	val result = repComp.userSessionRepository.findValidSession[UserSession](sessionId)
+  	val result = repComp.userSessionRepository.findValidSession[UserSession](sessionId, sessionLifetime)
   	result map {
   		case Nil => throw new UserNotFoundException("session not valid or expired")
   		case List(userSession) => userSession

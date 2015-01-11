@@ -25,18 +25,19 @@ class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseReposi
     list[T](query)
 	}
   
-  def findValidSession[T](sessionId: String)(implicit reader:BSONDocumentReader[T]) = {
+  def findValidSession[T](sessionId: String, sessionLifetime: Long)(implicit reader:BSONDocumentReader[T]) = {
     val query = BSONDocument(
-        "sessionId" -> sessionId,
-        "expired" -> BSONDocument("$exists" -> false))
+        "sessionId"	-> sessionId,
+        "updated"		-> BSONDocument("$gt"			-> (DateTime.now.getMillis() - sessionLifetime)),
+        "expired"		-> BSONDocument("$exists" -> false))
     list[T](query)
   }
   
   def markAsExpired(userSession: Future[UserSession]) = {
     userSession map  { u =>
-	    val now = DateTime.now()
 	    val selector = BSONDocument("_id" -> u._id.get)
-	    val modifier = BSONDocument("$set" -> BSONDocument("expired" -> BSONLong(now.getMillis())))
+	    val modifier = BSONDocument(
+	        "$set" -> BSONDocument("expired" -> BSONLong(DateTime.now.getMillis())))
 	      
 	    val res = db.collection(collectionName).update(selector, modifier)
 	    res.onComplete {

@@ -75,6 +75,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   }
   val authService= new AuthComponent with AuthService {
     val repComp = repositoryComponent
+    val sessionLifetime = (24 * 60 * 60 * 1000).toLong //24 hours in millis
   }
   
   /**
@@ -150,7 +151,19 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
 	    	  import bp.trainapp.model.DeviceClassJsonProtocol._
 	    		entity(as[DeviceClass]) { (device) =>
 	  	    	respondWithMediaType(`application/json`) {
-		  	      val res = repositoryComponent.deviceRepository.createFromDeviceClass(device)
+		  	      val res = repositoryComponent.deviceRepository.createFrom(device)
+		  	      onComplete(res) {
+		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+		  	        case Failure(e) => failWith(e)
+		  	      } 
+	  	    	}
+	  	    }
+	    	} ~
+	    	put {
+	    	  import bp.trainapp.model.DeviceUpdateClassJsonProtocol._
+	    		entity(as[DeviceUpdateClass]) { (device) =>
+	  	    	respondWithMediaType(`application/json`) {
+		  	      val res = repositoryComponent.deviceRepository.createFrom(device)
 		  	      onComplete(res) {
 		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
 		  	        case Failure(e) => failWith(e)
