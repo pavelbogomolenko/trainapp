@@ -10,7 +10,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-featur
 
 resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+//resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= {
   val akkaV = "2.3.6"
@@ -25,7 +25,7 @@ libraryDependencies ++= {
     "com.typesafe.akka"			%%  "akka-slf4j"		% 	akkaV,
     "org.specs2"				%%	"specs2-core"		%	"2.3.11" % "test",
     "com.github.nscala-time" 	%%	"nscala-time"		% 	"1.6.0",
-    "org.reactivemongo" 		%%	"reactivemongo" 	%	"0.11.0-SNAPSHOT",
+    "org.reactivemongo" 		%%	"reactivemongo" 	%	"0.10.5.0.akka23",
     "ch.qos.logback"			%   "logback-classic"	% 	"1.0.13",
     "commons-codec" 			%	"commons-codec"		% 	"1.10"
   )

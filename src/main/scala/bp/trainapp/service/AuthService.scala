@@ -26,10 +26,10 @@ trait AuthService {
 	  DigestUtils.sha1Hex(sha1ArrayByte)
 	}
 	
-	def login(login: String, password: String) = {
+	def login(login: String, password: String): Future[UserSession] = {
 		val result = repComp.userRepository.findByCredentials[User](login, password)
 		result map {
-			case Nil => Future.failed[String](throw new UserNotFoundException("user not found"))
+			case Nil => throw new UserNotFoundException("user not found")
       case List(user) => {
         val userSession = UserSession(
             _id = None,
@@ -44,12 +44,20 @@ trait AuthService {
 		}
 	}
 	
-	def validateSession(sessionId: String) = {
-  	val result = repComp.userSessionRepository.findBySesseionId[UserSession](sessionId)
+	/**
+	 * @to-do added more check (expiration date,)
+	 */
+	def validateSession(sessionId: String): Future[UserSession] = {
+  	val result = repComp.userSessionRepository.findValidSession[UserSession](sessionId)
   	result map {
-  		case Nil => Future.failed[String](throw new UserNotFoundException("session not valid or expired"))
+  		case Nil => throw new UserNotFoundException("session not valid or expired")
   		case List(userSession) => userSession
   	}
+	}
+	
+  def logout(sessionId: String) = {
+  	val userSession: Future[UserSession] = validateSession(sessionId)
+  	repComp.userSessionRepository.markAsExpired(userSession)
 	}
 }
 

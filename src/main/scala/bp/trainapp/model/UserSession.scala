@@ -8,7 +8,7 @@ import com.github.nscala_time.time.Imports._
 import reactivemongo.bson._
 
 case class UserSession(
-		_id: Option[String],
+		_id: Option[BSONObjectID],
 		userId: BSONObjectID,
 		sessionId: String,
 		ip: Option[String],
@@ -31,7 +31,7 @@ object UserSession {
   implicit object UserSessionReader extends BSONDocumentReader[UserSession] {
     def read(doc: BSONDocument): UserSession = {
 		  UserSession(
-		      doc.get("_id").map(f => f.toString()),
+		      doc.getAs[BSONObjectID]("_id"),
 		      doc.getAs[BSONObjectID]("userId").get,
 		      doc.getAs[BSONString]("sessionId").get.value,
 		      doc.getAs[BSONString]("ip").map(_.toString()),

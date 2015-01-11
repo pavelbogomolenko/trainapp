@@ -23,3 +23,5 @@ class MongoDbDriver(val host: String, val dbName: String) {
 trait DbDriverComponent {
   val db:MongoDbDriver
 }
+
+class MongoDbDriverException(message: String) extends Exception(message)

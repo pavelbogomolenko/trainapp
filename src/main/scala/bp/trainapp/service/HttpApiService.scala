@@ -119,6 +119,17 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   	    }
   	  }
   	} ~
+  	path(API_ROUET_PREFIX / API_VERSION / "logout") {
+  	  auth {
+	  	  headerValueByName("X-Auth") { sessionId =>
+  	      val res = authService.logout(sessionId)
+  	      onComplete(res) {
+	  	    	case Success(r) => complete(StatusCodes.NoContent) 
+	  	      case Failure(e) => failWith(e)
+	  	    }
+	  	  }
+  	  }
+  	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "usersession") {
     	getJson {
     	  complete {
