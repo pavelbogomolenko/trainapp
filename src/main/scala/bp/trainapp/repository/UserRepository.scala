@@ -16,7 +16,7 @@ import bp.trainapp.model.UserClass
 
 class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
     
-  val collectionName = "trainapp.user"
+  val collectionName = db.dbName + "." + "user"
   
   def save(user: User) = user match {
     case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {

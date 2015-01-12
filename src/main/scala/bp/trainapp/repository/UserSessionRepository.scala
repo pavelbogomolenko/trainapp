@@ -14,7 +14,7 @@ import bp.trainapp.model.UserSession
 
 class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
     
-  val collectionName = "trainapp.usersession"
+  val collectionName = db.dbName + "." + "usersession"
   
   def findBySesseionId[T](sessionId: String)(implicit reader:BSONDocumentReader[T]) = {
     val query = BSONDocument("sessionId" -> sessionId)

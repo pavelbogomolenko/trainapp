@@ -44,7 +44,7 @@ class HttpApiServiceActor extends Actor with HttpApiService {
 }
 
 // this trait defines our service behavior independently from the service actor
-trait HttpApiService extends HttpService with SprayJsonSupport {
+trait HttpApiService extends HttpService with SprayJsonSupport with AppConfig {
   
   val API_ROUET_PREFIX = "api"
   val API_VERSION = "1.0"
@@ -71,11 +71,11 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
   }
   
   val repositoryComponent = new RepositoryComponent with DbDriverComponent {
-    val db = new MongoDbDriver("localhost", "trainapp")
+    val db = new MongoDbDriver(DbConfig.host, DbConfig.name)
   }
   val authService= new AuthComponent with AuthService {
     val repComp = repositoryComponent
-    val sessionLifetime = (24 * 60 * 60 * 1000).toLong //24 hours in millis
+    val sessionLifetime = SessionConfig.sessionLifetime.toLong
   }
   
   /**

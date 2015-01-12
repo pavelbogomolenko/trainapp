@@ -12,17 +12,20 @@ import reactivemongo.bson._
 import bp.trainapp.service.{MongoDbDriver, MongoDbDriverException}
 import bp.trainapp.model.{Entity, Device, DeviceClass, DeviceUpdateClass}
 
-class DeviceRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {    
-  val collectionName = "trainapp.device"
+class DeviceRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
+  
+  val collectionName = db.dbName + "." + "device"
     
   def save(device: Device) = device match {
     case Device(_id, _, _, _, _, _, _) if _id != None => {
       val selector = BSONDocument("_id" -> device._id.get)
       val modifier = BSONDocument(
       		"$set" -> BSONDocument(
-      				"title" -> device.title,
-      				"attributes" -> device.attributes,
-      				"last_trained" -> device.last_trained.map(_.getMillis()))) 
+      				"title" 				-> device.title,
+      				"userId"				-> device.userId,
+      				"isPrototype" 	-> device.isPrototype,
+      				"attributes"		-> device.attributes,
+      				"last_trained"	-> device.last_trained.map(_.getMillis()))) 
       				
      update(selector, modifier)
     }
@@ -48,7 +51,7 @@ class DeviceRepository[T](override val db:MongoDbDriver) extends BaseRepository(
 	  	    _id = Some(duc.id),
 	  	    title = duc.title,
 	  	    created = DateTime.now(),
-	  	    userId = None,
+	  	    userId = duc.userId,
 	  	    isPrototype = None,
 	  	    attributes = duc.attributes,
 	  	    last_trained = None)

@@ -27,7 +27,8 @@ libraryDependencies ++= {
     "com.github.nscala-time" 	%%	"nscala-time"		% 	"1.6.0",
     "org.reactivemongo" 		%%	"reactivemongo" 	%	"0.10.5.0.akka23",
     "ch.qos.logback"			%   "logback-classic"	% 	"1.0.13",
-    "commons-codec" 			%	"commons-codec"		% 	"1.10"
+    "commons-codec" 			%	"commons-codec"		% 	"1.10",
+    "com.typesafe"				%	"config"			%	"1.2.1"
   )
 }
 

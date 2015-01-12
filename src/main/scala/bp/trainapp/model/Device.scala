@@ -51,7 +51,7 @@ case class Device(
 object Device {
   
   implicit object DeviceWriter extends BSONDocumentWriter[Device] {
-  	def write(device: Device): BSONDocument = { 
+  	def write(device: Device): BSONDocument = {
   	  BSONDocument(
   	      "title"							-> BSONString(device.title),
   	      "created"						-> BSONLong(device.created.getMillis()),
