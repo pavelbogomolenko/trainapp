@@ -20,18 +20,17 @@ class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db
   
   def save(user: User) = user match {
     case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {
-      //val selector = BSONDocument("_id" -> user._id)
-      val selector = BSONDocument()
+      val selector = BSONDocument("_id" -> user._id.get)
       val modifier = BSONDocument(
       "$set" -> BSONDocument(
       		"login" -> user.email,
       		"password" -> user.password))  
-      db.collection(collectionName).update(selector, modifier)
+      update(selector, modifier)
     }
     case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
       val found = findByLogin(email) map {
-        case Nil => db.collection(collectionName).insert(user)
-        case List(a) => Future.failed[String](throw new UserExistsException("user exists"))
+        case Nil => insert(user)
+        case List(a) => throw new UserExistsException("user exists")
       }
       found
     }

@@ -1,5 +1,7 @@
 package bp.trainapp.repository
 
+import scala.util.{Success, Failure}
+
 import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -7,7 +9,7 @@ import reactivemongo.api._
 import reactivemongo.bson._
 
 import bp.trainapp.service.DbDriverComponent
-import bp.trainapp.service.MongoDbDriver
+import bp.trainapp.service.{MongoDbDriver, MongoDbDriverException}
 import bp.trainapp.model._
 
 trait RepositoryComponent {
@@ -30,5 +32,25 @@ abstract class BaseRepository[T](val db:MongoDbDriver) {
   
   def save[T](model: T)(implicit reader:BSONDocumentWriter[T]) = {
     db.collection(collectionName).insert(model)
+  }
+  
+  def insert[T](model: T)(implicit reader:BSONDocumentWriter[T]) = {
+    val res = db.collection(collectionName).insert(model)
+    res onComplete {
+      case Success(result)  => result
+      case Failure(failure) => throw new MongoDbDriverException("Failed to insert record " 
+          + failure.getMessage())
+    }
+  	res
+  }
+  
+  def update(selector: BSONDocument, modifier: BSONDocument) = {
+    val res = db.collection(collectionName).update(selector, modifier) 
+    res onComplete {
+      case Success(result)  => result
+      case Failure(failure) => throw new MongoDbDriverException("Failed to update record " 
+          + failure.getMessage())
+    }
+    res
   }
 }

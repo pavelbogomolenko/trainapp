@@ -83,36 +83,38 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
    */
   val myRoute = 
   	path(API_ROUET_PREFIX / API_VERSION / "user") {
-  	  getJson {
-  	    auth {
-  	      complete {
-  	      	import bp.trainapp.model.UserJsonProtocol._
-  	      	repositoryComponent.userRepository.list[User]()
-  	      }
-  	    }
-  	  } ~
-  	  post {
-  	    import bp.trainapp.model.UserClassJsonProtocol._
-  	    entity(as[UserClass]) { (u) =>
-  	      respondWithMediaType(`application/json`) {
-	  	      val res = repositoryComponent.userRepository.createFromUserClass(u)
-	  	      onComplete(res) {
-	  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
-	  	        case Failure(e) => failWith(e)
-	  	      } 
-  	      }
-  	    }
-  	  }
+    	auth {
+	  	  getJson {
+		      complete {
+		      	import bp.trainapp.model.UserJsonProtocol._
+		      	repositoryComponent.userRepository.list[User]()
+		      }
+	  	  } ~
+	  	  post {
+	  	    import bp.trainapp.model.UserClassJsonProtocol._
+	  	    entity(as[UserClass]) { (u) =>
+	  	      respondWithMediaType(`application/json`) {
+		  	      val res = repositoryComponent.userRepository.createFromUserClass(u)
+		  	      onComplete(res) {
+		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
+		  	        case Failure(e) => failWith(e)
+		  	      } 
+	  	      }
+	  	    }
+	  	  }
+    	}
   	} ~
   	path(API_ROUET_PREFIX / API_VERSION / "login") {
   	  import bp.trainapp.model.UserClassJsonProtocol._
+  	  //@to-do check if user with given session already logged-in
   	  entity(as[UserClass]) { (u) =>
   	    respondWithMediaType(`application/json`) {
   	      val res = authService.login(u.email, u.password)
   	      onComplete(res) {
 	  	    	case Success(r:UserSession) => {
 	  	    	  respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
-	  	    	  	complete(StatusCodes.NoContent)
+	  	    	    import bp.trainapp.model.UserSessionJsonProtocol._
+	  	    	  	complete(StatusCodes.OK, r)
 	  	    	  }
 	  	    	} 
 	  	      case Failure(e) => complete(StatusCodes.Unauthorized)
@@ -161,9 +163,9 @@ trait HttpApiService extends HttpService with SprayJsonSupport {
 	    	} ~
 	    	put {
 	    	  import bp.trainapp.model.DeviceUpdateClassJsonProtocol._
-	    		entity(as[DeviceUpdateClass]) { (device) =>
+	    		entity(as[DeviceUpdateClass]) { (deviceUpdate) =>
 	  	    	respondWithMediaType(`application/json`) {
-		  	      val res = repositoryComponent.deviceRepository.createFrom(device)
+		  	      val res = repositoryComponent.deviceRepository.createFrom(deviceUpdate)
 		  	      onComplete(res) {
 		  	        case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""") 
 		  	        case Failure(e) => failWith(e)

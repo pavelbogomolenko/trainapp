@@ -27,6 +27,9 @@ trait AuthService {
 	  DigestUtils.sha1Hex(sha1ArrayByte)
 	}
 	
+  /**
+   * @to-do do not store password unencrypted
+   */
 	def login(login: String, password: String): Future[UserSession] = {
 		val result = repComp.userRepository.findByCredentials[User](login, password)
 		result map {

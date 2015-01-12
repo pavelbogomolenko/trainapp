@@ -16,10 +16,6 @@ class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseReposi
     
   val collectionName = "trainapp.usersession"
   
-  def save(userSession: UserSession) = {
-    db.collection(collectionName).insert(userSession)
-  }
-  
   def findBySesseionId[T](sessionId: String)(implicit reader:BSONDocumentReader[T]) = {
     val query = BSONDocument("sessionId" -> sessionId)
     list[T](query)
@@ -39,11 +35,7 @@ class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseReposi
 	    val modifier = BSONDocument(
 	        "$set" -> BSONDocument("expired" -> BSONLong(DateTime.now.getMillis())))
 	      
-	    val res = db.collection(collectionName).update(selector, modifier)
-	    res.onComplete {
-	      case Success(result)  => result
-	      case Failure(failure) => throw new MongoDbDriverException(failure.getMessage())
-	    }
+	    update(selector, modifier)
     }
   }
 }
