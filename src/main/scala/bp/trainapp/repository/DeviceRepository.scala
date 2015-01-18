@@ -12,8 +12,9 @@ import reactivemongo.bson._
 import bp.trainapp.service.{MongoDbDriver, MongoDbDriverException}
 import bp.trainapp.model.{Entity, Device, DeviceClass, DeviceUpdateClass}
 
-class DeviceRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
+class DeviceRepository extends BaseRepository {
   
+  type Model = Device
   val collectionName = db.dbName + "." + "device"
     
   def save(device: Device) = device match {

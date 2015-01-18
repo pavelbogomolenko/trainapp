@@ -28,10 +28,10 @@ trait AuthService {
 	}
 	
   /**
-   * @to-do do not store password unencrypted
+   * @to-do do not store password un-encrypted
    */
 	def login(login: String, password: String): Future[UserSession] = {
-		val result = repComp.userRepository.findByCredentials[User](login, password)
+		val result = repComp.userRepository.findByCredentials(login, password)
 		result map {
 			case Nil => throw new UserNotFoundException("user not found")
       case List(user) => {
@@ -42,14 +42,15 @@ trait AuthService {
             ip = None,
             updated = DateTime.now(), 
             expired = None)
-        repComp.userSessionRepository.save(userSession)
+        
+        repComp.userSessionRepository.insert(userSession)
         userSession
       }
 		}
 	}
 	
 	def validateSession(sessionId: String): Future[UserSession] = {
-  	val result = repComp.userSessionRepository.findValidSession[UserSession](sessionId, sessionLifetime)
+  	val result = repComp.userSessionRepository.findValidSession(sessionId, sessionLifetime)
   	result map {
   		case Nil => throw new UserNotFoundException("session not valid or expired")
   		case List(userSession) => userSession
@@ -57,7 +58,7 @@ trait AuthService {
 	}
 	
   def logout(sessionId: String) = {
-  	val userSession: Future[UserSession] = validateSession(sessionId)
+  	val userSession = validateSession(sessionId)
   	repComp.userSessionRepository.markAsExpired(userSession)
 	}
 }
