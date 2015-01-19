@@ -17,9 +17,9 @@ import bp.trainapp.model.User
 
 import bp.trainapp.service._
 
-trait AuthService {
-  val repComp: RepositoryComponent
-  val sessionLifetime: Long
+trait AuthService extends RepositoryComponent with AppConfig {
+  
+  val sessionLifetime: Long = SessionConfig.sessionLifetime.toLong
     
 	def generateToken: String = {
 	  val token = UUID.randomUUID().toString() + "-" + DateTime.now().getMillis()
@@ -31,7 +31,7 @@ trait AuthService {
    * @to-do do not store password un-encrypted
    */
 	def login(login: String, password: String): Future[UserSession] = {
-		val result = repComp.userRepository.findByCredentials(login, password)
+		val result = userRepository.findByCredentials(login, password)
 		result map {
 			case Nil => throw new UserNotFoundException("user not found")
       case List(user) => {
@@ -43,14 +43,14 @@ trait AuthService {
             updated = DateTime.now(), 
             expired = None)
         
-        repComp.userSessionRepository.insert(userSession)
+        userSessionRepository.insert(userSession)
         userSession
       }
 		}
 	}
 	
 	def validateSession(sessionId: String): Future[UserSession] = {
-  	val result = repComp.userSessionRepository.findValidSession(sessionId, sessionLifetime)
+  	val result = userSessionRepository.findValidSession(sessionId, sessionLifetime)
   	result map {
   		case Nil => throw new UserNotFoundException("session not valid or expired")
   		case List(userSession) => userSession
@@ -59,10 +59,6 @@ trait AuthService {
 	
   def logout(sessionId: String) = {
   	val userSession = validateSession(sessionId)
-  	repComp.userSessionRepository.markAsExpired(userSession)
+  	userSessionRepository.markAsExpired(userSession)
 	}
-}
-
-trait AuthComponent {
-	this: AuthService =>
 }

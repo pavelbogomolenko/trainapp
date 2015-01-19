@@ -18,6 +18,10 @@ class UserSessionRepository extends BaseRepository {
   
   val collectionName = db.dbName + "." + "usersession"
   
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
+	}
+  
   def findBySesseionId(sessionId: String): Future[List[Model]] = {
     val query = BSONDocument("sessionId" -> sessionId)
     super.list[Model](query)

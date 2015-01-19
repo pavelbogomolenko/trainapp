@@ -34,6 +34,10 @@ class DeviceRepository extends BaseRepository {
     	insert(device)
     }
   }
+  
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
+	}
     
   def createFrom(d: Entity) = d match {
     case dc:DeviceClass => {
