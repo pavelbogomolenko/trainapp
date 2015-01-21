@@ -19,6 +19,9 @@ class MongoDbDriver(val host: String, val dbName: String) {
   type Writer[T] = BSONDocumentWriter[T]
   type Q = BSONDocument
   
+  /**
+   * establish connection
+   */
 	lazy val connect: Connection = {
 	  // gets an instance of the driver
 		// (creates an actor system)
@@ -33,6 +36,14 @@ class MongoDbDriver(val host: String, val dbName: String) {
 		connect(name)
 	}
 	
+	private def validateFuture(f: Future[_], errMsg: String): Future[_] = {
+  	f onComplete {
+      case Success(result)  => result
+      case Failure(failure) => throw new MongoDbDriverException(errMsg + " " + failure.getMessage())
+    }
+  	f
+	}
+	
 	def list[T](table: String, query: Q = BSONDocument())(implicit reader:Reader[T]): Future[List[T]] = {
 		collection(table).
 			find(query).
@@ -42,22 +53,32 @@ class MongoDbDriver(val host: String, val dbName: String) {
 	
 	def insert[T](table: String, model: T)(implicit writer:Writer[T]): Future[_] = {
     val res = collection(table).insert(model)
-    res onComplete {
-      case Success(result)  => result
-      case Failure(failure) => throw new MongoDbDriverException("Failed to insert record " 
-          + failure.getMessage())
-    }
-  	res
+    validateFuture(res, "Failed to insert record")
   }
 	
   def update(table: String, selector: Q, modifier: Q): Future[_] = {
-    val res = collection(table).update(selector, modifier) 
-    res onComplete {
-      case Success(result)  => result
-      case Failure(failure) => throw new MongoDbDriverException("Failed to update record " 
-          + failure.getMessage())
-    }
-    res
+    val res = collection(table).update(selector, modifier)
+    validateFuture(res, "Failed to update record")
+  }
+  
+  /**
+   * drop table (collection)
+   */
+  def drop(table: String): Future[_] = {
+    val res = collection(table).drop()
+  	validateFuture(res, "Failed to drop table")
+  }
+  
+  /**
+   * remove data from table by query
+   */
+  def remove(table: String, query: Q = BSONDocument()) = {
+    val res = collection(table).remove(query)
+    validateFuture(res, "Failed to remove data from table")
+  }
+  
+  def stats(table: String) = {
+    validateFuture(collection(table).stats, "Failed to get stats")
   }
 }
 

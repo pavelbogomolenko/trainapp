@@ -5,9 +5,13 @@ import bp.trainapp.service.MongoDbDriverComponent
 
 trait MongoDbTestBase extends Specification with Before with MongoDbDriverComponent {
   
-  def cleanDB() = {
-    println(db.dbName, db.host)
+  def cleanDB = {
+    //db.drop("trainapp.device")
+    println(db.dbName)
+    db.remove(db.dbName + "." + "user")
+    println("after remove")
+    //db.drop("trainapp.usersession")
   }
   
-  def before = cleanDB()
+  def before = cleanDB
 }
