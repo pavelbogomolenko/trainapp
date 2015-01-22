@@ -15,7 +15,7 @@ import bp.trainapp.model.{Entity, Device, DeviceClass, DeviceUpdateClass}
 class DeviceRepository extends BaseRepository {
   
   type Model = Device
-  val collectionName = db.dbName + "." + "device"
+  val collectionName = "device"
     
   def save(device: Device) = device match {
     case Device(_id, _, _, _, _, _, _, _, _) if _id != None => {

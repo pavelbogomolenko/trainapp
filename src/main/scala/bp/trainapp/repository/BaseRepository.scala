@@ -17,31 +17,32 @@ import bp.trainapp.model._
 abstract class BaseRepository extends MongoDbDriverComponent {
   type Model
   val collectionName: String
+  private val fullCollectionName = db.dbName + "." + collectionName
   
   def list[Model](query: db.Q = BSONDocument())(implicit reader:db.Reader[Model]): Future[List[Model]] = {    
-  	db.list[Model](collectionName, query)
+  	db.list[Model](fullCollectionName, query)
   }
   
   def insert[Model](model: Model)(implicit writer:db.Writer[Model]): Future[_] = {
-  	db.insert[Model](collectionName, model)
+  	db.insert[Model](fullCollectionName, model)
   }
   
   def update(selector: db.Q, modifier: db.Q): Future[_] = {
-    db.update(collectionName, selector, modifier)
+    db.update(fullCollectionName, selector, modifier)
   }
   
   /**
    * remove data from table by query
    */
   def remove(query: db.Q = BSONDocument()) = {
-    db.remove(collectionName, query)
+    db.remove(fullCollectionName, query)
   }
   
   /**
    * get statistical information about collection
    */
   def stats = {
-    db.stats(collectionName)
+    db.stats(fullCollectionName)
   }
 }
 

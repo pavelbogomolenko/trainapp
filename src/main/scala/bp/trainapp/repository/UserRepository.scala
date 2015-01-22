@@ -16,7 +16,7 @@ class UserRepository extends BaseRepository {
   
   type Model = User
   
-  val collectionName = db.dbName + "." + "user"
+  val collectionName = "user"
   
   def save(user: User) = user match {
     case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {

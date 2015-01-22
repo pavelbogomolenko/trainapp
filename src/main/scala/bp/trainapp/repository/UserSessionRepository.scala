@@ -16,7 +16,7 @@ class UserSessionRepository extends BaseRepository {
     
   type Model = UserSession
   
-  val collectionName = db.dbName + "." + "usersession"
+  val collectionName = "usersession"
   
   def list(): Future[List[Model]] = {
     super.list[Model]()
