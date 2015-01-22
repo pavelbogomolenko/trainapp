@@ -11,6 +11,7 @@ import reactivemongo.bson.{BSONReader, BSONWriter}
 case class Training(
     _id: Option[BSONObjectID],
     userId: Option[BSONObjectID],
+    programId: Option[BSONObjectID],
 		start: DateTime,
 		finish: Option[DateTime])
 		
@@ -20,6 +21,7 @@ object Training {
   	def write(training: Training): BSONDocument = {
   	  BSONDocument(
   	  		"userId"						-> training.userId,
+  	  		"programId"					-> training.programId,
   	      "start"							-> BSONLong(training.start.getMillis()),
   	      "finish"						-> training.finish.map(_.getMillis()))
   	}
@@ -30,6 +32,7 @@ object Training {
 		  Training(
 		      doc.getAs[BSONObjectID]("_id"),
 		      doc.getAs[BSONObjectID]("userId"),
+		      doc.getAs[BSONObjectID]("programId"),
 		      doc.getAs[BSONLong]("start").get.value.toDateTime,
 		      doc.getAs[BSONLong]("finish").map(_.value.toDateTime))
     }
@@ -38,5 +41,5 @@ object Training {
 
 object TrainingJsonProtocol extends DefaultJsonProtocol {
   import bp.trainapp.model.BaseModel._
-  implicit val trainingJsonFormat = jsonFormat4(Training.apply)
+  implicit val trainingJsonFormat = jsonFormat5(Training.apply)
 }

@@ -9,7 +9,6 @@ import org.joda.time.DateTime
 import reactivemongo.api._
 import reactivemongo.bson._
 
-//import bp.trainapp.service.{MongoDbDriver, MongoDbDriverException} 
 import bp.trainapp.model.Training
 
 class TrainingRepository extends BaseRepository {
