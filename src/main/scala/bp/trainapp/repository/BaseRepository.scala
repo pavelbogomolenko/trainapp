@@ -29,6 +29,20 @@ abstract class BaseRepository extends MongoDbDriverComponent {
   def update(selector: db.Q, modifier: db.Q): Future[_] = {
     db.update(collectionName, selector, modifier)
   }
+  
+  /**
+   * remove data from table by query
+   */
+  def remove(query: db.Q = BSONDocument()) = {
+    db.remove(collectionName, query)
+  }
+  
+  /**
+   * get statistical information about collection
+   */
+  def stats = {
+    db.stats(collectionName)
+  }
 }
 
 trait RepositoryComponent {

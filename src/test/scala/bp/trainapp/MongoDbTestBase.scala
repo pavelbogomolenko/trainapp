@@ -1,17 +1,19 @@
 package bp.trainapp
 
-import org.specs2.mutable.{Before, Specification}
-import bp.trainapp.service.MongoDbDriverComponent
+import org.specs2.mutable.{Specification}
+import org.specs2.specification.BeforeExample
+import bp.trainapp.repository.RepositoryComponent
 
-trait MongoDbTestBase extends Specification with Before with MongoDbDriverComponent {
+trait MongoDbTestBase extends Specification with BeforeExample with RepositoryComponent {
   
+	def before = cleanDB
+  
+  /**
+   * clear db collections
+   */
   def cleanDB = {
-    //db.drop("trainapp.device")
-    println(db.dbName)
-    db.remove(db.dbName + "." + "user")
-    println("after remove")
-    //db.drop("trainapp.usersession")
+    userRepository.remove()
+    userSessionRepository.remove()
+    deviceRepository.remove()
   }
-  
-  def before = cleanDB
 }
