@@ -44,8 +44,27 @@ abstract class BaseRepository extends MongoDbDriverComponent {
   def stats = {
     db.stats(fullCollectionName)
   }
+  
+  /**
+   * Find documents by id
+   */
+  def findById(id: BSONObjectID)(implicit reader:db.Reader[Model]): Future[List[Model]] = {
+    val query = BSONDocument("_id" -> id)
+  	list[Model](query)
+  }
+  
+  /**
+   * Find documents by list of ids
+   */
+  def findByIds(id: List[BSONObjectID])(implicit reader:db.Reader[Model]): Future[List[Model]] = {
+    val query = BSONDocument("_id" -> BSONDocument("$in" -> id))
+  	list[Model](query)
+  }
 }
 
+/**
+ * Trait containing all available repository instances
+ */
 trait RepositoryComponent {
   lazy val userRepository = new UserRepository
   lazy val userSessionRepository = new UserSessionRepository

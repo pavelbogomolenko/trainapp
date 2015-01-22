@@ -20,5 +20,16 @@ class TrainingRepository extends BaseRepository {
   def list(): Future[List[Model]] = {
     super.list[Model]()
 	}
- 
+  
+  def findByUserId(userId: BSONObjectID) = {
+    val query = BSONDocument("userId" -> userId)
+    super.list[Model](query)
+  }
+  
+  def findByUserIdAndTrainingId(userId: BSONObjectID, trainingId: BSONObjectID) = {
+    val query = BSONDocument(
+        "userId" -> userId,
+        "trainingId" -> trainingId)
+    super.list[Model](query)
+  }
 }
