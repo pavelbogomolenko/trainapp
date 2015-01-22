@@ -13,7 +13,7 @@ case class UserClass(email: String, password: String) extends Entity
 case class UserProfileClass(
     firstName: Option[String], 
 		lastName: Option[String], 
-		age: Option[Double], 
+		age: Option[Int], 
 		gender: Option[String], 
 		height: Option[Double], 
 		weight: Option[Double]) extends Entity
