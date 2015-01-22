@@ -8,41 +8,35 @@ import com.github.nscala_time.time.Imports._
 import reactivemongo.bson._
 import reactivemongo.bson.{BSONReader, BSONWriter}
 
-case class Program(
+case class Training(
     _id: Option[BSONObjectID],
-		title: String,
-		created: DateTime,
-		userId: Option[BSONObjectID],
-		devices: Option[List[BSONObjectID]],
-		isDefault: Option[Int])
+    userId: Option[BSONObjectID],
+		start: DateTime,
+		finish: Option[DateTime])
 		
-object Program {
+object Training {
   
-  implicit object ProgramWriter extends BSONDocumentWriter[Program] {
-  	def write(program: Program): BSONDocument = {
+  implicit object TrainingWriter extends BSONDocumentWriter[Training] {
+  	def write(training: Training): BSONDocument = {
   	  BSONDocument(
-  	      "title"							-> BSONString(program.title),
-  	      "created"						-> BSONLong(program.created.getMillis()),
-  	      "userId"						-> program.userId,
-  	      "devices"						-> BSONArray(program.devices),
-  	      "isDefault"					-> program.isDefault)
+  	  		"userId"						-> training.userId,
+  	      "start"							-> BSONLong(training.start.getMillis()),
+  	      "finish"						-> training.finish.map(_.getMillis()))
   	}
   }
   
-  implicit object ProgrammReader extends BSONDocumentReader[Program] {
-    def read(doc: BSONDocument): Program = {
-		  Program(
+  implicit object ProgrammReader extends BSONDocumentReader[Training] {
+    def read(doc: BSONDocument): Training = {
+		  Training(
 		      doc.getAs[BSONObjectID]("_id"),
-		      doc.getAs[BSONString]("title").get.value,
-		      doc.getAs[BSONLong]("created").get.value.toDateTime,
 		      doc.getAs[BSONObjectID]("userId"),
-		      doc.getAs[List[BSONObjectID]]("attributes"),
-		      doc.getAs[BSONInteger]("isStatic").map(_.value))
+		      doc.getAs[BSONLong]("start").get.value.toDateTime,
+		      doc.getAs[BSONLong]("finish").map(_.value.toDateTime))
     }
   }
 }
 
-object ProgramJsonProtocol extends DefaultJsonProtocol {
+object TrainingJsonProtocol extends DefaultJsonProtocol {
   import bp.trainapp.model.BaseModel._
-  implicit val programJsonFormat = jsonFormat6(Program.apply)
+  implicit val trainingJsonFormat = jsonFormat4(Training.apply)
 }
