@@ -8,14 +8,14 @@ import org.joda.time.DateTime
 
 import reactivemongo.api._
 import reactivemongo.bson._
-import reactivemongo.core.commands.Count
 
-import bp.trainapp.service.MongoDbDriver
 import bp.trainapp.model.User
 import bp.trainapp.model.UserClass
 
-class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
-    
+class UserRepository extends BaseRepository {
+  
+  type Model = User
+  
   val collectionName = db.dbName + "." + "user"
   
   def save(user: User) = user match {
@@ -36,14 +36,18 @@ class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db
     }
   }
   
-  def findByCredentials[T](login: String, password: String)(implicit reader:BSONDocumentReader[T]) = {
-    val query = BSONDocument("email" -> login, "password" -> password)
-		list[T](query)
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
 	}
   
-  def findByLogin[T](login: String)(implicit reader:BSONDocumentReader[T]) = {
+  def findByCredentials(login: String, password: String) = {
+    val query = BSONDocument("email" -> login, "password" -> password)
+		super.list[Model](query)
+	}
+  
+  def findByLogin(login: String) = {
     val query = BSONDocument("email" -> login)
-    list[T](query)
+    super.list[Model](query)
 	}
   
   def createFromUserClass(u: UserClass) = {
@@ -58,6 +62,7 @@ class UserRepository[T](override val db:MongoDbDriver) extends BaseRepository(db
 				height = None, 
 				weight = None,
   	    created = DateTime.now())
+  	    
     save(user)
   }
 }

@@ -12,21 +12,27 @@ import reactivemongo.bson._
 import bp.trainapp.service.{MongoDbDriver, MongoDbDriverException} 
 import bp.trainapp.model.UserSession
 
-class UserSessionRepository[T](override val db:MongoDbDriver) extends BaseRepository(db) {
+class UserSessionRepository extends BaseRepository {
     
+  type Model = UserSession
+  
   val collectionName = db.dbName + "." + "usersession"
   
-  def findBySesseionId[T](sessionId: String)(implicit reader:BSONDocumentReader[T]) = {
-    val query = BSONDocument("sessionId" -> sessionId)
-    list[T](query)
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
 	}
   
-  def findValidSession[T](sessionId: String, sessionLifetime: Long)(implicit reader:BSONDocumentReader[T]) = {
+  def findBySesseionId(sessionId: String): Future[List[Model]] = {
+    val query = BSONDocument("sessionId" -> sessionId)
+    super.list[Model](query)
+	}
+  
+  def findValidSession(sessionId: String, sessionLifetime: Long): Future[List[Model]] = {
     val query = BSONDocument(
         "sessionId"	-> sessionId,
         "updated"		-> BSONDocument("$gt"			-> (DateTime.now.getMillis() - sessionLifetime)),
         "expired"		-> BSONDocument("$exists" -> false))
-    list[T](query)
+    super.list[Model](query)
   }
   
   def markAsExpired(userSession: Future[UserSession]) = {

@@ -11,14 +11,20 @@ import reactivemongo.bson.{BSONReader, BSONWriter}
 /**
  * DeviceAttribute model
  */
-case class DeviceAttribute(title: String, value: Option[String])
+case class DeviceAttribute(
+    title: String, 
+    value: Option[String],
+    measure: Option[String],
+    isStatic: Option[Int])
 		
 object DeviceAttribute {
   implicit object DeviceAttributeWriter extends BSONDocumentWriter[DeviceAttribute] {
   	def write(attr: DeviceAttribute): BSONDocument = { 
   	  BSONDocument(
   	      "title"				-> BSONString(attr.title),
-  	      "value"				-> attr.value)
+  	      "value"				-> attr.value,
+  	      "measure"			-> attr.measure,
+  	      "isStatic"		-> attr.isStatic)
   	}
   }
 
@@ -26,14 +32,16 @@ object DeviceAttribute {
     def read(doc: BSONDocument): DeviceAttribute = {
 		  DeviceAttribute(
 		      doc.getAs[BSONString]("title").get.value,
-		      doc.getAs[BSONString]("value").map(_.toString()))
+		      doc.getAs[BSONString]("value").map(_.toString()),
+		      doc.getAs[BSONString]("measure").map(_.toString()),
+		      doc.getAs[BSONInteger]("isStatic").map(_.value))
     }
   }
 }
 
 object DeviceAttributeJsonProtocol extends DefaultJsonProtocol {
   import bp.trainapp.model.BaseModel._
-  implicit val deviceAttributeJsonFormat = jsonFormat2(DeviceAttribute.apply)
+  implicit val deviceAttributeJsonFormat = jsonFormat4(DeviceAttribute.apply)
 }
 
 /**
@@ -46,7 +54,9 @@ case class Device(
 		userId: Option[BSONObjectID],
 		isPrototype: Option[Boolean],
 		attributes: Option[List[DeviceAttribute]],
-		last_trained: Option[DateTime])
+		programId: Option[BSONObjectID],
+		trainingId: Option[BSONObjectID],
+		lastTrained: Option[DateTime])
  
 object Device {
   
@@ -58,7 +68,9 @@ object Device {
   	      "userId"						-> device.userId,
   	      "isPrototype"				-> device.isPrototype,
   	      "attributes"				-> BSONArray(device.attributes),
-  	      "last_trained"			-> device.last_trained.map(_.getMillis()))
+  	      "programId"					-> device.programId,
+  	      "trainingId"				-> device.trainingId,
+  	      "lastTrained"				-> device.lastTrained.map(_.getMillis()))
   	}
   }
   
@@ -71,7 +83,9 @@ object Device {
 		      doc.getAs[BSONObjectID]("userId"),
 		      doc.getAs[BSONBoolean]("isPrototype").map(_.value),
 		      doc.getAs[List[DeviceAttribute]]("attributes"),
-		      doc.getAs[BSONLong]("last_trained").map(_.value.toDateTime))
+		      doc.getAs[BSONObjectID]("programId"),
+		      doc.getAs[BSONObjectID]("trainingId"),
+		      doc.getAs[BSONLong]("lastTrained").map(_.value.toDateTime))
     }
   }
 }
@@ -79,5 +93,5 @@ object Device {
 object DeviceJsonProtocol extends DefaultJsonProtocol {
   import  bp.trainapp.model.DeviceAttributeJsonProtocol._
   import bp.trainapp.model.BaseModel._
-  implicit val deviceJsonFormat = jsonFormat7(Device.apply)
+  implicit val deviceJsonFormat = jsonFormat9(Device.apply)
 }

@@ -5,3 +5,5 @@
 /project/target/
 /target/
 .cache
+.classpath
+.settings
