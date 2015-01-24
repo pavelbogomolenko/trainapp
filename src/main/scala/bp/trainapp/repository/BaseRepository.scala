@@ -17,7 +17,7 @@ import bp.trainapp.model._
 abstract class BaseRepository extends MongoDbDriverComponent {
   type Model
   val collectionName: String
-  private val fullCollectionName = db.dbName + "." + collectionName
+  private def fullCollectionName = db.dbName + "." + collectionName
   
   def list[Model](query: db.Q = BSONDocument())(implicit reader:db.Reader[Model]): Future[List[Model]] = {    
   	db.list[Model](fullCollectionName, query)
