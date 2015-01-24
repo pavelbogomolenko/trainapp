@@ -1,10 +1,11 @@
-language: scala
 services:
   - mongodb
 before_script:
+  - sleep 15
   - mongo trainapptest --eval 'db.trainapptest.user.insert({"email":"bpsource@gmail.com"});'
-  - mongo trainapptest --eval 'db.trainapptest.user.usersession.insert({"sessionId":"12312321323232312"});'
-  - mongo trainapptest --eval 'db.trainapptest.user.device.insert({"title":"a1"});'
+  - mongo trainapptest --eval 'db.trainapptest.usersession.insert({"sessionId":"12312321323232312"});'
+  - mongo trainapptest --eval 'db.trainapptest.device.insert({"title":"a1"});'
+language: scala
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION compile
   - sbt ++$TRAVIS_SCALA_VERSION test
