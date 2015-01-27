@@ -10,21 +10,21 @@ import org.joda.time.DateTime
 import com.github.nscala_time.time.Imports._
 
 object BaseModel {
-  /**
-   * implicit marshaling from and to BSONObjectID
-   */
+	/**
+	 * implicit marshaling from and to BSONObjectID
+	 */
 	implicit object BSONObjectIDFormat extends RootJsonFormat[BSONObjectID] {
-	  def write(objectId: BSONObjectID): JsValue = JsString(objectId.toString())
-	  def read(json: JsValue) = json match {
-	    case JsString(x) => {
-	      val maybeOID: Try[BSONObjectID] = BSONObjectID.parse(x)
-	      if(maybeOID.isSuccess) maybeOID.get 
-	      else {
-	        throw new DeserializationException("Expected BSONObjectID as JsString")
-	      }
-	    }
-	    case _ => throw new DeserializationException("Expected BSONObjectID as JsString")
-	  }
+		def write(objectId: BSONObjectID): JsValue = JsString(objectId.toString())
+		def read(json: JsValue) = json match {
+			case JsString(x) => {
+				val maybeOID: Try[BSONObjectID] = BSONObjectID.parse(x)
+				if (maybeOID.isSuccess) maybeOID.get
+				else {
+					throw new DeserializationException("Expected BSONObjectID as JsString")
+				}
+			}
+			case _ => throw new DeserializationException("Expected BSONObjectID as JsString")
+		}
 	}
 	/**
 	 * implicit marshaling from and to DateTime
@@ -32,8 +32,8 @@ object BaseModel {
 	implicit object DateTimeFormat extends RootJsonFormat[DateTime] {
 		def write(dt: DateTime): JsValue = JsString(dt.toString())
 		def read(json: JsValue) = json match {
-		  case JsNumber(dt) => dt.toLong.toDateTime
-		  case _ => throw new DeserializationException("Expected DateTime as JsNumber")
+			case JsNumber(dt) => dt.toLong.toDateTime
+			case _ => throw new DeserializationException("Expected DateTime as JsNumber")
 		}
 	}
 }
