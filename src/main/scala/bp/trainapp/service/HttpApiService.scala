@@ -41,7 +41,7 @@ class HttpApiServiceActor extends Actor with HttpApiService {
 
 // this trait defines our service behavior independently from the service actor
 trait HttpApiService extends HttpService with SprayJsonSupport with CorsSupport
-	with UserRoute with AuthRoute with UserSessionRoute with DeviceRoute {
+	with UserRoute with AuthRoute with UserSessionRoute with DeviceRoute with ProgramRoute {
 
 	val API_ROUET_PREFIX = "api"
 	val API_VERSION = "1.0"
@@ -57,7 +57,7 @@ trait HttpApiService extends HttpService with SprayJsonSupport with CorsSupport
 			pathPrefix(API_VERSION) {
 				cors {
 					respondWithMediaType(`application/json`) {
-						userRoute ~ authRoute ~ userSessionRoute ~ deviceRoute
+						userRoute ~ authRoute ~ userSessionRoute ~ deviceRoute ~ programRoute
 					}
 				}
 			}

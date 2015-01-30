@@ -20,8 +20,8 @@ import bp.trainapp.model._
 import bp.trainapp.service._
 import bp.trainapp.utils.SprayAuthDirective
 
-trait ProgramRoute {
-	this: HttpService with SprayJsonSupport with SprayAuthDirective with RepositoryComponent =>
+trait ProgramRoute extends HttpService 
+	with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
 
 	val programRoute =
 		pathPrefix("program") {
