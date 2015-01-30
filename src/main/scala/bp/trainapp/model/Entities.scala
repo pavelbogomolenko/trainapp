@@ -27,7 +27,25 @@ case class DeviceUpdateClass(
 	title: String,
 	userId: Option[BSONObjectID],
 	attributes: Option[List[DeviceAttribute]]) extends Entity
+	
+/**
+ * used to transform request entity when adding new program
+ */
+case class ProgramClass(title: String, userId: Option[BSONObjectID], devices: Option[List[Device]]) extends Entity
 
+/**
+ * used to transform request entity when updating new program
+ */
+case class ProgramUpdateClass(
+	id: BSONObjectID, 
+	title: String, 
+	devices: Option[List[Device]], 
+	isDefault: Option[Int]) extends Entity
+
+
+/**
+ * Providing JsonFormats for Case Classes
+ */
 object UserClassJsonProtocol extends DefaultJsonProtocol {
 	implicit val userClassJsonFormat = jsonFormat2(UserClass)
 }
@@ -45,4 +63,16 @@ object DeviceUpdateClassJsonProtocol extends DefaultJsonProtocol {
 	import bp.trainapp.model.BaseModel._
 	import bp.trainapp.model.DeviceAttributeJsonProtocol._
 	implicit val deviceUpdateClassJsonFormat = jsonFormat4(DeviceUpdateClass)
+}
+
+object ProgramClassJsonProtocol extends DefaultJsonProtocol {
+	import bp.trainapp.model.BaseModel._
+	import bp.trainapp.model.DeviceJsonProtocol._
+	implicit val programClassJsonFormat = jsonFormat3(ProgramClass)
+}
+
+object ProgramUpdateClassJsonProtocol extends DefaultJsonProtocol {
+	import bp.trainapp.model.BaseModel._
+	import bp.trainapp.model.DeviceJsonProtocol._
+	implicit val programUpdateClassJsonFormat = jsonFormat4(ProgramUpdateClass)
 }

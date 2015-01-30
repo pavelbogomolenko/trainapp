@@ -46,7 +46,7 @@ class DeviceRepository extends BaseRepository {
 			val device = Device(
 				_id = None,
 				title = dc.title,
-				created = DateTime.now(),
+				created = Some(DateTime.now()),
 				userId = None,
 				isPrototype = None,
 				attributes = dc.attributes,
@@ -59,7 +59,7 @@ class DeviceRepository extends BaseRepository {
 			val device = Device(
 				_id = Some(duc.id),
 				title = duc.title,
-				created = DateTime.now(),
+				created = None,
 				userId = duc.userId,
 				isPrototype = None,
 				attributes = duc.attributes,

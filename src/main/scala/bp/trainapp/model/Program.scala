@@ -11,9 +11,9 @@ import reactivemongo.bson.{ BSONReader, BSONWriter }
 case class Program(
 	_id: Option[BSONObjectID],
 	title: String,
-	created: DateTime,
+	created: Option[DateTime],
 	userId: Option[BSONObjectID],
-	devices: Option[List[BSONObjectID]],
+	devices: Option[List[Device]],
 	isDefault: Option[Int])
 
 object Program {
@@ -22,7 +22,7 @@ object Program {
 		def write(program: Program): BSONDocument = {
 			BSONDocument(
 				"title" -> BSONString(program.title),
-				"created" -> BSONLong(program.created.getMillis()),
+				"created" -> program.created.map(_.getMillis()),
 				"userId" -> program.userId,
 				"devices" -> BSONArray(program.devices),
 				"isDefault" -> program.isDefault)
@@ -34,9 +34,9 @@ object Program {
 			Program(
 				doc.getAs[BSONObjectID]("_id"),
 				doc.getAs[BSONString]("title").get.value,
-				doc.getAs[BSONLong]("created").get.value.toDateTime,
+				doc.getAs[BSONLong]("created").map(_.value.toDateTime),
 				doc.getAs[BSONObjectID]("userId"),
-				doc.getAs[List[BSONObjectID]]("attributes"),
+				doc.getAs[List[Device]]("attributes"),
 				doc.getAs[BSONInteger]("isStatic").map(_.value))
 		}
 	}
@@ -44,5 +44,6 @@ object Program {
 
 object ProgramJsonProtocol extends DefaultJsonProtocol {
 	import bp.trainapp.model.BaseModel._
+	import bp.trainapp.model.DeviceJsonProtocol._
 	implicit val programJsonFormat = jsonFormat6(Program.apply)
 }

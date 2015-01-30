@@ -50,7 +50,7 @@ object DeviceAttributeJsonProtocol extends DefaultJsonProtocol {
 case class Device(
 	_id: Option[BSONObjectID],
 	title: String,
-	created: DateTime,
+	created: Option[DateTime],
 	userId: Option[BSONObjectID],
 	isPrototype: Option[Boolean],
 	attributes: Option[List[DeviceAttribute]],
@@ -64,7 +64,7 @@ object Device {
 		def write(device: Device): BSONDocument = {
 			BSONDocument(
 				"title" -> BSONString(device.title),
-				"created" -> BSONLong(device.created.getMillis()),
+				"created" -> device.created.map(_.getMillis()),
 				"userId" -> device.userId,
 				"isPrototype" -> device.isPrototype,
 				"attributes" -> BSONArray(device.attributes),
@@ -79,7 +79,7 @@ object Device {
 			Device(
 				doc.getAs[BSONObjectID]("_id"),
 				doc.getAs[BSONString]("title").get.value,
-				doc.getAs[BSONLong]("created").get.value.toDateTime,
+				doc.getAs[BSONLong]("created").map(_.value.toDateTime),
 				doc.getAs[BSONObjectID]("userId"),
 				doc.getAs[BSONBoolean]("isPrototype").map(_.value),
 				doc.getAs[List[DeviceAttribute]]("attributes"),

@@ -23,9 +23,6 @@ import spray.routing.Directive.pimpApply
 import reactivemongo.bson._
 
 import bp.trainapp.utils.CorsSupport
-import bp.trainapp.repository._
-import bp.trainapp.model._
-import bp.trainapp.service._
 import bp.trainapp.route._
 
 // we don't implement our route structure directly in the service actor because

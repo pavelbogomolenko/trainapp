@@ -15,8 +15,15 @@ import bp.trainapp.model._
  * Base class for all MongoDB specific repositories
  */
 abstract class BaseRepository extends MongoDbDriverComponent {
+	/**
+	 * concrete Type Class that will be used to transform BPSON to Model
+	 */
 	type Model
+	/**
+	 * mongodb collection name
+	 */
 	val collectionName: String
+	
 	private def fullCollectionName = db.dbName + "." + collectionName
 
 	def list[Model](query: db.Q = BSONDocument())(implicit reader: db.Reader[Model]): Future[List[Model]] = {
@@ -69,4 +76,5 @@ trait RepositoryComponent {
 	lazy val userRepository = new UserRepository
 	lazy val userSessionRepository = new UserSessionRepository
 	lazy val deviceRepository = new DeviceRepository
+	lazy val programRepository = new ProgramRepository
 }
