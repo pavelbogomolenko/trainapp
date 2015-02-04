@@ -16,7 +16,7 @@ trait CorsSupport {
 	private val optionsCorsHeaders = List(
 		`Access-Control-Allow-Headers`(
 			"Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, " +
-				"Referer, User-Agent"),
+				"Referer, User-Agent, X-AUTH"),
 		`Access-Control-Max-Age`(60 * 60 * 24 * 20) // cache pre-flight response for 20 days
 		)
 

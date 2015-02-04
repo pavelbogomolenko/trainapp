@@ -23,8 +23,8 @@ import bp.trainapp.service._
 trait AuthRoute extends HttpService 
 	with SprayJsonSupport with AuthService with RepositoryComponent with SprayAuthDirective {
 
-	def respondWithAuthHeader(email: String, password: Option[String]): Route = {
-		val res = login(email, password.get)
+	def respondWithAuthHeader(email: String, password: Option[String], byEmailOnly:Boolean = false): Route = {
+		val res = if(byEmailOnly) loginByEmail(email) else login(email, password.get)
 		onComplete(res) {
 			case Success(r: UserSession) => {
 				respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
@@ -38,44 +38,41 @@ trait AuthRoute extends HttpService
 
 	val authRoute =
 		pathPrefix("login") {
-			import bp.trainapp.model.UserClassJsonProtocol._
-			//@to-do check if user with given session already logged-in
-			entity(as[UserClass]) { u =>
-				val res = login(u.email, u.password.get)
-				onComplete(res) {
-					case Success(r: UserSession) => {
-						respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
-							import bp.trainapp.model.UserSessionJsonProtocol._
-							complete(StatusCodes.OK, r)
-						}
-					}
-					case Failure(e) => complete(StatusCodes.Unauthorized)
+			post {
+				import bp.trainapp.model.UserClassJsonProtocol._
+				//@to-do check if user with given session already logged-in
+				entity(as[UserClass]) { u =>
+					respondWithAuthHeader(u.email, u.password)
 				}
 			}
 		} ~
 		pathPrefix("fblogin") {
-			import bp.trainapp.model.UserClassJsonProtocol._
-			//@to-do check if user with given session already logged-in
-			entity(as[UserClass]) { u =>
-				val findUserFuture = userRepository.findByLogin(u.email)
-				onComplete(findUserFuture) {
-					case Success(r: User) => respondWithAuthHeader(r.email, r.password)
-					case Failure(e) => {
-						val newUser = userRepository.createFrom(u)
-						onComplete(newUser) {
-							case Success(r:User) => respondWithAuthHeader(r.email, r.password)
-							case Failure(e) => failWith(e)
+			post {
+				import bp.trainapp.model.UserClassJsonProtocol._
+				//@to-do check if user with given session already logged-in
+				entity(as[UserClass]) { u =>
+					val findUserFuture = userRepository.findOneByLogin(u.email)
+					onComplete(findUserFuture) {
+						case Success(u: User) => respondWithAuthHeader(u.email, u.password, true)
+						case Failure(e) => {
+							val newUser = userRepository.createFrom(u)
+							onComplete(newUser) {
+								case Success(u:User) => respondWithAuthHeader(u.email, u.password, true)
+								case Failure(e) => failWith(e)
+							}
 						}
 					}
 				}
 			}
 		} ~
 		pathPrefix("logout") {
-			auth { userSession =>
-				val res = logout(userSession.sessionId)
-				onComplete(res) {
-					case Success(r) => complete(StatusCodes.NoContent)
-					case Failure(e) => failWith(e)
+			post {
+				auth { userSession =>
+					val res = logout(userSession.sessionId)
+					onComplete(res) {
+						case Success(r) => complete(StatusCodes.NoContent)
+						case Failure(e) => failWith(e)
+					}
 				}
 			}
 		}

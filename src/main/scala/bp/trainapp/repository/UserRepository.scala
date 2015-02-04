@@ -28,9 +28,9 @@ class UserRepository extends BaseRepository {
 			update(selector, modifier)
 		}
 		case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
-			val found = findByLogin(email) map {
-				case Nil => insert(user)
-				case List(a) => throw new UserExistsException("user exists")
+			val found = findOneByLogin(email) flatMap {
+				case user:User => insert(user)
+				case _ => throw new UserExistsException("user exists")
 			}
 			found
 		}
@@ -45,9 +45,12 @@ class UserRepository extends BaseRepository {
 		super.list[Model](query)
 	}
 
-	def findByLogin(login: String) = {
+	def findOneByLogin(login: String) = {
 		val query = BSONDocument("email" -> login)
-		super.list[Model](query)
+		super.list[Model](query) map {
+      case List(futureUser) => futureUser
+      case _ => throw new UserNotFoundException("user not found")
+		}
 	}
 
 	def createFrom(u: UserClass) = {

@@ -48,6 +48,22 @@ trait AuthService extends RepositoryComponent with AppConfig {
 			}
 		}
 	}
+  
+  def loginByEmail(login: String): Future[UserSession] = {
+    val result = userRepository.findOneByLogin(login)
+    result map { user =>
+      val userSession = UserSession(
+        _id = None,
+        userId = user._id.get,
+        sessionId = generateToken,
+        ip = None,
+        updated = DateTime.now(),
+        expired = None)
+
+      userSessionRepository.insert(userSession)
+      userSession
+    }
+  }
 
 	def validateSession(sessionId: String): Future[UserSession] = {
 		val result = userSessionRepository.findValidSession(sessionId, sessionLifetime)
