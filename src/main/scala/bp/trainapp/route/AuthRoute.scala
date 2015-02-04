@@ -21,14 +21,27 @@ import bp.trainapp.model._
 import bp.trainapp.service._
 
 trait AuthRoute extends HttpService 
-	with SprayJsonSupport with AuthService with SprayAuthDirective {
+	with SprayJsonSupport with AuthService with RepositoryComponent with SprayAuthDirective {
+
+	def respondWithAuthHeader(email: String, password: Option[String]): Route = {
+		val res = login(email, password.get)
+		onComplete(res) {
+			case Success(r: UserSession) => {
+				respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
+					import bp.trainapp.model.UserSessionJsonProtocol._
+					complete(StatusCodes.OK, r)
+				}
+			}
+			case Failure(e) => complete(StatusCodes.Unauthorized)
+		}
+	}
 
 	val authRoute =
 		pathPrefix("login") {
 			import bp.trainapp.model.UserClassJsonProtocol._
 			//@to-do check if user with given session already logged-in
 			entity(as[UserClass]) { u =>
-				val res = login(u.email, u.password)
+				val res = login(u.email, u.password.get)
 				onComplete(res) {
 					case Success(r: UserSession) => {
 						respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
@@ -37,6 +50,23 @@ trait AuthRoute extends HttpService
 						}
 					}
 					case Failure(e) => complete(StatusCodes.Unauthorized)
+				}
+			}
+		} ~
+		pathPrefix("fblogin") {
+			import bp.trainapp.model.UserClassJsonProtocol._
+			//@to-do check if user with given session already logged-in
+			entity(as[UserClass]) { u =>
+				val findUserFuture = userRepository.findByLogin(u.email)
+				onComplete(findUserFuture) {
+					case Success(r: User) => respondWithAuthHeader(r.email, r.password)
+					case Failure(e) => {
+						val newUser = userRepository.createFrom(u)
+						onComplete(newUser) {
+							case Success(r:User) => respondWithAuthHeader(r.email, r.password)
+							case Failure(e) => failWith(e)
+						}
+					}
 				}
 			}
 		} ~

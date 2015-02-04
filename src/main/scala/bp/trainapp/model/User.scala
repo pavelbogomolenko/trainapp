@@ -10,7 +10,7 @@ import reactivemongo.bson._
 case class User(
 	_id: Option[BSONObjectID],
 	email: String,
-	password: String,
+	password: Option[String],
 	firstName: Option[String],
 	lastName: Option[String],
 	age: Option[Int],
@@ -25,7 +25,7 @@ object User {
 		def write(user: User): BSONDocument = {
 			BSONDocument(
 				"email" -> BSONString(user.email),
-				"password" -> BSONString(user.password),
+				"password" -> user.password,
 				"firstName" -> user.firstName,
 				"lastName" -> user.lastName,
 				"age" -> user.age,
@@ -41,7 +41,7 @@ object User {
 			User(
 				doc.getAs[BSONObjectID]("_id"),
 				doc.getAs[BSONString]("email").get.value,
-				doc.getAs[BSONString]("password").get.value,
+				doc.getAs[BSONString]("password").map(_.toString),
 				doc.getAs[String]("firstName"),
 				doc.getAs[String]("lastName"),
 				doc.getAs[Int]("age"),

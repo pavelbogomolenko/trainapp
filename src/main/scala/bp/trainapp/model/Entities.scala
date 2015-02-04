@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 
 abstract class Entity
 
-case class UserClass(email: String, password: String) extends Entity
+case class UserClass(email: String, password: Option[String]) extends Entity
 
 case class UserProfileClass(
 	firstName: Option[String],

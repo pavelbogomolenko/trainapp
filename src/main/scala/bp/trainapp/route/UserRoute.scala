@@ -31,15 +31,15 @@ trait UserRoute extends HttpService with SprayJsonSupport with
 						import bp.trainapp.model.UserJsonProtocol._
 						userRepository.list()
 					}
-				} ~
-				post {
-					import bp.trainapp.model.UserClassJsonProtocol._
-					entity(as[UserClass]) { (u) =>
-						val res = userRepository.createFromUserClass(u)
-						onComplete(res) {
-							case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-							case Failure(e) => failWith(e)
-						}
+				}
+			} ~ 
+			post {
+				import bp.trainapp.model.UserClassJsonProtocol._
+				entity(as[UserClass]) { (u) =>
+					val res = userRepository.createFrom(u)
+					onComplete(res) {
+						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+						case Failure(e) => failWith(e)
 					}
 				}
 			}

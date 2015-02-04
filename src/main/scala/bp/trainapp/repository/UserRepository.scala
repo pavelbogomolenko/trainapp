@@ -50,7 +50,7 @@ class UserRepository extends BaseRepository {
 		super.list[Model](query)
 	}
 
-	def createFromUserClass(u: UserClass) = {
+	def createFrom(u: UserClass) = {
 		val user = User(
 			_id = None,
 			email = u.email,
@@ -62,7 +62,6 @@ class UserRepository extends BaseRepository {
 			height = None,
 			weight = None,
 			created = DateTime.now())
-
 		save(user)
 	}
 }
