@@ -38,12 +38,12 @@ trait AuthRoute extends HttpService
 
 	val authRoute =
     pathPrefix("islogin") {
-      auth { userSession =>
         get {
-          import bp.trainapp.model.UserSessionJsonProtocol._
-          complete(StatusCodes.OK, userSession)
+          auth { userSession =>
+            import bp.trainapp.model.UserSessionJsonProtocol._
+            complete(userSession)
+          }
         }
-      }
     } ~
 		pathPrefix("login") {
 			post {
