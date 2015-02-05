@@ -1,6 +1,6 @@
 package bp.trainapp.utils
 
-import spray.http.{ AllOrigins, HttpMethods, HttpMethod, HttpResponse }
+import spray.http.{ SomeOrigins, HttpMethods, HttpMethod, HttpResponse }
 import spray.http.HttpHeaders._
 import spray.http.HttpMethods._
 import spray.routing._
@@ -12,7 +12,7 @@ import spray.routing._
 trait CorsSupport {
 	this: HttpService =>
 
-	private val allowOriginHeader = `Access-Control-Allow-Origin`(AllOrigins)
+	private val allowOriginHeader = `Access-Control-Allow-Origin`(SomeOrigins(Seq("http://localhost:8000")))
 	private val optionsCorsHeaders = List(
 		`Access-Control-Allow-Headers`(
 			"Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, " +
@@ -33,8 +33,9 @@ trait CorsSupport {
 					context.complete(HttpResponse().withHeaders(
 						`Access-Control-Allow-Methods`(OPTIONS, allowedMethods: _*) ::
 							allowOriginHeader ::
+              `Access-Control-Allow-Credentials`(true) ::
 							optionsCorsHeaders))
 				}
-			} withHttpResponseHeadersMapped { headers => allowOriginHeader :: headers }
+			} withHttpResponseHeadersMapped { headers => allowOriginHeader :: `Access-Control-Allow-Credentials`(true) :: headers }
 	}
 }
