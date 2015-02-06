@@ -41,13 +41,13 @@ class DeviceRepository extends BaseRepository {
 		super.list[Model]()
 	}
 
-	def createFrom(d: Entity) = d match {
+	def createFrom(d: Entity, userId: Option[BSONObjectID] = None) = d match {
 		case dc: DeviceClass => {
 			val device = Device(
 				_id = None,
 				title = dc.title,
 				created = Some(DateTime.now()),
-				userId = None,
+				userId = userId,
 				isPrototype = None,
 				attributes = dc.attributes,
 				programId = None,
@@ -60,7 +60,7 @@ class DeviceRepository extends BaseRepository {
 				_id = Some(duc.id),
 				title = duc.title,
 				created = None,
-				userId = duc.userId,
+				userId = if(duc.userId != None) duc.userId else userId,
 				isPrototype = None,
 				attributes = duc.attributes,
 				programId = None,

@@ -37,7 +37,7 @@ trait ProgramRoute extends HttpService
         auth { userSession =>
   				import bp.trainapp.model.ProgramClassJsonProtocol._
   				entity(as[ProgramClass]) { program =>
-  					val res = programRepository.createFrom(program)
+  					val res = programRepository.createFrom(program, Some(userSession.userId))
   					onComplete(res) {
   						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
   						case Failure(e) => failWith(e)
@@ -47,9 +47,9 @@ trait ProgramRoute extends HttpService
 			} ~
 			put {
         auth { userSession =>
-  				import bp.trainapp.model.DeviceUpdateClassJsonProtocol._
-  				entity(as[DeviceUpdateClass]) { deviceUpdate =>
-  					val res = deviceRepository.createFrom(deviceUpdate)
+  				import bp.trainapp.model.ProgramUpdateClassJsonProtocol._
+  				entity(as[ProgramUpdateClass]) { programUpdate =>
+  					val res = programRepository.createFrom(programUpdate, Some(userSession.userId))
   					onComplete(res) {
   						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
   						case Failure(e) => failWith(e)

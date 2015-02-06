@@ -39,13 +39,13 @@ class ProgramRepository extends BaseRepository {
 		super.list[Model](query)
 	}
 	
-	def createFrom(e: Entity) = e match {
+	def createFrom(e: Entity, userId: Option[BSONObjectID] = None) = e match {
 		case pc: ProgramClass => {
 			val program = Program(
 				_id = None,
 				title = pc.title,
 				created = Some(DateTime.now()),
-				userId = pc.userId,
+				userId = if(pc.userId != None) pc.userId else userId,
 				devices = pc.devices,
 				isDefault = None)
 			save(program)
