@@ -25,33 +25,37 @@ trait ProgramRoute extends HttpService
 
 	val programRoute =
 		pathPrefix("program") {
-			auth { userSession =>
-				get {
-					complete {
-						import bp.trainapp.model.ProgramJsonProtocol._
-						programRepository.list()
-					}
-				} ~
-				post {
-					import bp.trainapp.model.ProgramClassJsonProtocol._
-					entity(as[ProgramClass]) { program =>
-						val res = programRepository.createFrom(program)
-						onComplete(res) {
-							case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-							case Failure(e) => failWith(e)
-						}
-					}
-				} ~
-				put {
-					import bp.trainapp.model.DeviceUpdateClassJsonProtocol._
-					entity(as[DeviceUpdateClass]) { deviceUpdate =>
-						val res = deviceRepository.createFrom(deviceUpdate)
-						onComplete(res) {
-							case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-							case Failure(e) => failWith(e)
-						}
-					}
-				}
+			get {
+        auth { userSession =>
+  				complete {
+  					import bp.trainapp.model.ProgramJsonProtocol._
+  					programRepository.findByUserId(userSession.userId)
+  				}
+        }
+			} ~
+			post {
+        auth { userSession =>
+  				import bp.trainapp.model.ProgramClassJsonProtocol._
+  				entity(as[ProgramClass]) { program =>
+  					val res = programRepository.createFrom(program)
+  					onComplete(res) {
+  						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+  						case Failure(e) => failWith(e)
+  					}
+  				}
+        }
+			} ~
+			put {
+        auth { userSession =>
+  				import bp.trainapp.model.DeviceUpdateClassJsonProtocol._
+  				entity(as[DeviceUpdateClass]) { deviceUpdate =>
+  					val res = deviceRepository.createFrom(deviceUpdate)
+  					onComplete(res) {
+  						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+  						case Failure(e) => failWith(e)
+  					}
+  				}
+        }
 			}
 		}
 }
