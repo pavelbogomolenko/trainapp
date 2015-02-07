@@ -24,6 +24,7 @@ trait AuthRoute extends HttpService
   with SprayJsonSupport with AuthService with RepositoryComponent with SprayAuthDirective {
 
   def respondWithAuthHeader(email: String, password: Option[String], byEmailOnly: Boolean = false): Route = {
+    //@to-do FIX!!! password can be None
     val res = if (byEmailOnly) loginByEmail(email) else login(email, password.get)
     onComplete(res) {
       case Success(r: UserSession) => {
@@ -61,13 +62,19 @@ trait AuthRoute extends HttpService
         entity(as[UserClass]) { u =>
           val findUserFuture = userRepository.findOneByLogin(u.email)
           onComplete(findUserFuture) {
-            case Success(u: User) => respondWithAuthHeader(u.email, u.password, true)
-            case Failure(e) => {
-              val newUser = userRepository.createFrom(u)
-              onComplete(newUser) {
-                case Success(u: User) => respondWithAuthHeader(u.email, u.password, true)
-                case Failure(e)       => failWith(e)
+            case Success(o) => {
+              o match {
+                case user:User => respondWithAuthHeader(user.email, user.password, true)
+                case _ => {
+                  println("trying to create temp user...")
+                  val newUser = userRepository.createFrom(u)
+                  respondWithAuthHeader(newUser.email, newUser.password, true)
+                }
               }
+              
+            }
+            case Failure(e) => {
+              failWith(e)
             }
           }
         }

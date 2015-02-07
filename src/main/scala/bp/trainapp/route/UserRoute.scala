@@ -36,10 +36,11 @@ trait UserRoute extends HttpService with SprayJsonSupport with SprayAuthDirectiv
         import bp.trainapp.model.UserClassJsonProtocol._
         entity(as[UserClass]) { (u) =>
           val res = userRepository.createFrom(u)
-          onComplete(res) {
-            case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-            case Failure(e) => failWith(e)
-          }
+          complete(StatusCodes.Created, """{"status": "ok"}""")
+//          onComplete(res) {
+//            case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+//            case Failure(e) => failWith(e)
+//          }
         }
       }
     }

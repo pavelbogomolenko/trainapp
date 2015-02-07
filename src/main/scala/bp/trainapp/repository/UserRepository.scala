@@ -3,12 +3,9 @@ package bp.trainapp.repository
 import scala.util.{ Try, Success, Failure }
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import org.joda.time.DateTime
-
 import reactivemongo.api._
 import reactivemongo.bson._
-
 import bp.trainapp.model.User
 import bp.trainapp.model.UserClass
 
@@ -26,13 +23,16 @@ class UserRepository extends BaseRepository {
           "login" -> user.email,
           "password" -> user.password))
       update(selector, modifier)
+      //@to-do not that good to return object need proper error handling in terms of error
+      user
     }
     case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
       val found = findOneByLogin(email) flatMap {
-        case user: User => insert(user)
-        case _          => throw new UserExistsException("user exists")
+        case user: User => throw new UserExistsException("user exists")
+        case _          => insert(user)
       }
-      found
+      //@to-do not that good to return object need proper error handling in terms of error
+      user
     }
   }
 
@@ -49,7 +49,7 @@ class UserRepository extends BaseRepository {
     val query = BSONDocument("email" -> login)
     super.list[Model](query) map {
       case List(futureUser) => futureUser
-      case _                => throw new UserNotFoundException("user not found")
+      case _                => None
     }
   }
 
