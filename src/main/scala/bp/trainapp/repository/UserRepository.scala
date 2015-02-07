@@ -14,59 +14,59 @@ import bp.trainapp.model.UserClass
 
 class UserRepository extends BaseRepository {
 
-	type Model = User
+  type Model = User
 
-	val collectionName = "user"
+  val collectionName = "user"
 
-	def save(user: User) = user match {
-		case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {
-			val selector = BSONDocument("_id" -> user._id.get)
-			val modifier = BSONDocument(
-				"$set" -> BSONDocument(
-					"login" -> user.email,
-					"password" -> user.password))
-			update(selector, modifier)
-		}
-		case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
-			val found = findOneByLogin(email) flatMap {
-				case user:User => insert(user)
-				case _ => throw new UserExistsException("user exists")
-			}
-			found
-		}
-	}
+  def save(user: User) = user match {
+    case User(_id, _, _, _, _, _, _, _, _, _) if _id != None => {
+      val selector = BSONDocument("_id" -> user._id.get)
+      val modifier = BSONDocument(
+        "$set" -> BSONDocument(
+          "login" -> user.email,
+          "password" -> user.password))
+      update(selector, modifier)
+    }
+    case User(None, email, password, firstName, lastName, age, gender, height, weight, created) => {
+      val found = findOneByLogin(email) flatMap {
+        case user: User => insert(user)
+        case _          => throw new UserExistsException("user exists")
+      }
+      found
+    }
+  }
 
-	def list(): Future[List[Model]] = {
-		super.list[Model]()
-	}
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
+  }
 
-	def findByCredentials(login: String, password: String) = {
-		val query = BSONDocument("email" -> login, "password" -> password)
-		super.list[Model](query)
-	}
+  def findByCredentials(login: String, password: String) = {
+    val query = BSONDocument("email" -> login, "password" -> password)
+    super.list[Model](query)
+  }
 
-	def findOneByLogin(login: String) = {
-		val query = BSONDocument("email" -> login)
-		super.list[Model](query) map {
+  def findOneByLogin(login: String) = {
+    val query = BSONDocument("email" -> login)
+    super.list[Model](query) map {
       case List(futureUser) => futureUser
-      case _ => throw new UserNotFoundException("user not found")
-		}
-	}
+      case _                => throw new UserNotFoundException("user not found")
+    }
+  }
 
-	def createFrom(u: UserClass) = {
-		val user = User(
-			_id = None,
-			email = u.email,
-			password = u.password,
-			firstName = None,
-			lastName = None,
-			age = None,
-			gender = None,
-			height = None,
-			weight = None,
-			created = DateTime.now())
-		save(user)
-	}
+  def createFrom(u: UserClass) = {
+    val user = User(
+      _id = None,
+      email = u.email,
+      password = u.password,
+      firstName = None,
+      lastName = None,
+      age = None,
+      gender = None,
+      height = None,
+      weight = None,
+      created = DateTime.now())
+    save(user)
+  }
 }
 
 class UserNotFoundException(message: String) extends Exception(message)

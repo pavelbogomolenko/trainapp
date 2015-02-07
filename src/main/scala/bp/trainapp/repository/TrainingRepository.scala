@@ -13,23 +13,23 @@ import bp.trainapp.model.Training
 
 class TrainingRepository extends BaseRepository {
 
-	type Model = Training
+  type Model = Training
 
-	val collectionName = "training"
+  val collectionName = "training"
 
-	def list(): Future[List[Model]] = {
-		super.list[Model]()
-	}
+  def list(): Future[List[Model]] = {
+    super.list[Model]()
+  }
 
-	def findByUserId(userId: BSONObjectID) = {
-		val query = BSONDocument("userId" -> userId)
-		super.list[Model](query)
-	}
+  def findByUserId(userId: BSONObjectID) = {
+    val query = BSONDocument("userId" -> userId)
+    super.list[Model](query)
+  }
 
-	def findByUserIdAndTrainingId(userId: BSONObjectID, trainingId: BSONObjectID) = {
-		val query = BSONDocument(
-			"userId" -> userId,
-			"trainingId" -> trainingId)
-		super.list[Model](query)
-	}
+  def findByUserIdAndTrainingId(userId: BSONObjectID, trainingId: BSONObjectID) = {
+    val query = BSONDocument(
+      "userId" -> userId,
+      "trainingId" -> trainingId)
+    super.list[Model](query)
+  }
 }

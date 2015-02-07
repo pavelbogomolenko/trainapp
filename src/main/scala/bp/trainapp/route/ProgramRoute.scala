@@ -20,42 +20,42 @@ import bp.trainapp.model._
 import bp.trainapp.service._
 import bp.trainapp.utils.SprayAuthDirective
 
-trait ProgramRoute extends HttpService 
-	with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
+trait ProgramRoute extends HttpService
+  with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
 
-	val programRoute =
-		pathPrefix("program") {
-			get {
+  val programRoute =
+    pathPrefix("program") {
+      get {
         auth { userSession =>
-  				complete {
-  					import bp.trainapp.model.ProgramJsonProtocol._
-  					programRepository.findByUserId(userSession.userId)
-  				}
+          complete {
+            import bp.trainapp.model.ProgramJsonProtocol._
+            programRepository.findByUserId(userSession.userId)
+          }
         }
-			} ~
-			post {
+      } ~
+      post {
         auth { userSession =>
-  				import bp.trainapp.model.ProgramClassJsonProtocol._
-  				entity(as[ProgramClass]) { program =>
-  					val res = programRepository.createFrom(program, Some(userSession.userId))
-  					onComplete(res) {
-  						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-  						case Failure(e) => failWith(e)
-  					}
-  				}
+          import bp.trainapp.model.ProgramClassJsonProtocol._
+          entity(as[ProgramClass]) { program =>
+            val res = programRepository.createFrom(program, Some(userSession.userId))
+            onComplete(res) {
+              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+              case Failure(e) => failWith(e)
+            }
+          }
         }
-			} ~
-			put {
+      } ~
+      put {
         auth { userSession =>
-  				import bp.trainapp.model.ProgramUpdateClassJsonProtocol._
-  				entity(as[ProgramUpdateClass]) { programUpdate =>
-  					val res = programRepository.createFrom(programUpdate, Some(userSession.userId))
-  					onComplete(res) {
-  						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-  						case Failure(e) => failWith(e)
-  					}
-  				}
+          import bp.trainapp.model.ProgramUpdateClassJsonProtocol._
+          entity(as[ProgramUpdateClass]) { programUpdate =>
+            val res = programRepository.createFrom(programUpdate, Some(userSession.userId))
+            onComplete(res) {
+              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+              case Failure(e) => failWith(e)
+            }
+          }
         }
-			}
-		}
+      }
+    }
 }

@@ -23,15 +23,15 @@ import bp.trainapp.service._
  */
 trait SprayAuthDirective extends HttpService with AuthService {
 
-	def auth: Directive[UserSession :: HNil] = {
-		headerValueByName("X-Auth").flatMap {
-			case sessionId => {
-				val futureSession = validateSession(sessionId)
-				onComplete(futureSession).flatMap {
-					case Success(r: UserSession) => provide(r)
-					case Failure(e) => complete(StatusCodes.Unauthorized, e)
-				}
-			} 
-		}
-	}
+  def auth: Directive[UserSession :: HNil] = {
+    headerValueByName("X-Auth").flatMap {
+      case sessionId => {
+        val futureSession = validateSession(sessionId)
+        onComplete(futureSession).flatMap {
+          case Success(r: UserSession) => provide(r)
+          case Failure(e)              => complete(StatusCodes.Unauthorized, e)
+        }
+      }
+    }
+  }
 }

@@ -20,16 +20,16 @@ import bp.trainapp.model._
 import bp.trainapp.service._
 import bp.trainapp.utils.SprayAuthDirective
 
-trait UserSessionRoute extends HttpService 
-	with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
+trait UserSessionRoute extends HttpService
+  with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
 
-	val userSessionRoute =
-		pathPrefix("usersession") {
-			get {
-				complete {
-					import bp.trainapp.model.UserSessionJsonProtocol._
-					userSessionRepository.list()
-				}
-			}
-		}
+  val userSessionRoute =
+    pathPrefix("usersession") {
+      get {
+        complete {
+          import bp.trainapp.model.UserSessionJsonProtocol._
+          userSessionRepository.list()
+        }
+      }
+    }
 }

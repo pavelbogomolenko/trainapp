@@ -20,28 +20,27 @@ import bp.trainapp.model._
 import bp.trainapp.service._
 import bp.trainapp.utils.SprayAuthDirective
 
-trait UserRoute extends HttpService with SprayJsonSupport with 
-	SprayAuthDirective with RepositoryComponent {
+trait UserRoute extends HttpService with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
 
-	val userRoute =
-		pathPrefix("user") {
-			auth { userSession =>
-				get {
-					complete {
-						import bp.trainapp.model.UserJsonProtocol._
-						userRepository.list()
-					}
-				}
-			} ~ 
-			post {
-				import bp.trainapp.model.UserClassJsonProtocol._
-				entity(as[UserClass]) { (u) =>
-					val res = userRepository.createFrom(u)
-					onComplete(res) {
-						case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-						case Failure(e) => failWith(e)
-					}
-				}
-			}
-		}
+  val userRoute =
+    pathPrefix("user") {
+      auth { userSession =>
+        get {
+          complete {
+            import bp.trainapp.model.UserJsonProtocol._
+            userRepository.list()
+          }
+        }
+      } ~
+      post {
+        import bp.trainapp.model.UserClassJsonProtocol._
+        entity(as[UserClass]) { (u) =>
+          val res = userRepository.createFrom(u)
+          onComplete(res) {
+            case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
+            case Failure(e) => failWith(e)
+          }
+        }
+      }
+    }
 }
