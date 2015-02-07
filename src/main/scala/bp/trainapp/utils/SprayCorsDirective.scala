@@ -5,19 +5,24 @@ import spray.http.HttpHeaders._
 import spray.http.HttpMethods._
 import spray.routing._
 
+import bp.trainapp.service.AppConfig
+
 /**
  * A mixin to provide support for CORS headers
  * Implementation inspired by this thread https://gist.github.com/joseraya/176821d856b43b1cfe19
  */
-trait CorsSupport {
-  this: HttpService =>
+trait CorsSupport extends HttpService with AppConfig { 
 
-  private val allowOriginHeader = `Access-Control-Allow-Origin`(SomeOrigins(Seq("http://localhost:8000")))
+  private val allowOriginHeader = `Access-Control-Allow-Origin`(
+      SomeOrigins(
+        Seq(CorsConfig.allowOrigin.asInstanceOf[spray.http.HttpOrigin])
+      )
+  )
   private val optionsCorsHeaders = List(
     `Access-Control-Allow-Headers`(
       "Origin, X-Requested-With, Content-Type, Accept, Accept-Encoding, Accept-Language, Host, " +
         "Referer, User-Agent, X-AUTH"),
-    `Access-Control-Max-Age`(60 * 60 * 24 * 20) // cache pre-flight response for 20 days
+    `Access-Control-Max-Age`(CorsConfig.controlMaxAge)
     )
 
   def cors[T]: Directive0 = mapRequestContext {

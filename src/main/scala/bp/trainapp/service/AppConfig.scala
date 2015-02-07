@@ -21,4 +21,11 @@ trait AppConfig {
 
     lazy val sessionLifetime = sessionConfig.getString("sessionLifetime")
   }
+  
+  object CorsConfig {
+    private val corsConfig = root.getConfig("session")
+    
+    lazy val allowOrigin = corsConfig.getAnyRefList("allowOrigin")
+    lazy val controlMaxAge = corsConfig.getInt("controlMaxAge")
+  }
 }
