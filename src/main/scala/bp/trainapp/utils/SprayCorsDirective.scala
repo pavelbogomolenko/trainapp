@@ -15,7 +15,7 @@ trait CorsSupport extends HttpService with AppConfig {
 
   private val allowOriginHeader = `Access-Control-Allow-Origin`(
       SomeOrigins(
-        Seq(CorsConfig.allowOrigin.asInstanceOf[spray.http.HttpOrigin])
+        Seq(CorsConfig.allowOrigin)
       )
   )
   private val optionsCorsHeaders = List(
