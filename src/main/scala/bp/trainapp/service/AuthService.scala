@@ -2,20 +2,15 @@ package bp.trainapp.service
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import java.util.UUID
-
 import org.apache.commons.codec.digest.DigestUtils
-
 import org.joda.time.DateTime
-
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.repository.UserNotFoundException
-
 import bp.trainapp.model.UserSession
 import bp.trainapp.model.User
-
 import bp.trainapp.service._
+import reactivemongo.bson.BSONObjectID
 
 trait AuthService extends RepositoryComponent with AppConfig {
 
@@ -49,12 +44,10 @@ trait AuthService extends RepositoryComponent with AppConfig {
     }
   }
 
-  /**
-   * @to-do add check if user has been already logged in and there is an existing session
-   */
   def loginByEmail(login: String): Future[UserSession] = {
     val result = userRepository.findOneByLogin(login)
     result map {
+      //user already in db
       case user:User => {
         val userSession = UserSession(
           _id = None,
@@ -63,10 +56,18 @@ trait AuthService extends RepositoryComponent with AppConfig {
           ip = None,
           updated = DateTime.now(),
           expired = None)
-  
+
         userSessionRepository.insert(userSession)
         userSession
       }
+    }
+  }
+  
+  def loginBySessionId(sessionId: String): Future[UserSession] = {
+    val result = userSessionRepository.findOneBySesseionId(sessionId)
+    result map {
+      case userSession:UserSession => userSession
+      //case None => loginByEmail(sessionId).
     }
   }
 

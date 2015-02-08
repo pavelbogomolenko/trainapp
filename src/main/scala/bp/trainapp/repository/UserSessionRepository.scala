@@ -22,9 +22,12 @@ class UserSessionRepository extends BaseRepository {
     super.list[Model]()
   }
 
-  def findBySesseionId(sessionId: String): Future[List[Model]] = {
+  def findOneBySesseionId(sessionId: String): Future[Serializable] = {
     val query = BSONDocument("sessionId" -> sessionId)
-    super.list[Model](query)
+    super.list[Model](query) map {
+      case List(futureSession)  => futureSession
+      case _                    => None
+    }
   }
 
   def findValidSession(sessionId: String, sessionLifetime: Long): Future[List[Model]] = {

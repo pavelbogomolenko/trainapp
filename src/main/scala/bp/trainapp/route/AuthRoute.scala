@@ -23,17 +23,15 @@ import bp.trainapp.service._
 trait AuthRoute extends HttpService
   with SprayJsonSupport with AuthService with RepositoryComponent with SprayAuthDirective {
 
-  def respondWithAuthHeader(email: String, password: Option[String], byEmailOnly: Boolean = false): Route = {
-    //@to-do FIX!!! password can be None
-    val res = if (byEmailOnly) loginByEmail(email) else login(email, password.get)
-    onComplete(res) {
+  def respondWithAuthHeader(futureSession: Future[UserSession]): Route = {
+    onComplete(futureSession) {
       case Success(r: UserSession) => {
         respondWithHeader(RawHeader("X-Auth", r.sessionId)) {
           import bp.trainapp.model.UserSessionJsonProtocol._
           complete(StatusCodes.OK, r)
         }
       }
-      case Failure(e) => complete(StatusCodes.Unauthorized)
+      case Failure(e) => complete(StatusCodes.Unauthorized, """{"status": "auth fail"}""")
     }
   }
 
@@ -51,7 +49,8 @@ trait AuthRoute extends HttpService
         import bp.trainapp.model.UserClassJsonProtocol._
         //@to-do check if user with given session already logged-in
         entity(as[UserClass]) { u =>
-          respondWithAuthHeader(u.email, u.password)
+          val futureSession = login(u.email, u.password.getOrElse(""))
+          respondWithAuthHeader(futureSession)
         }
       }
     } ~
@@ -60,21 +59,46 @@ trait AuthRoute extends HttpService
         import bp.trainapp.model.UserClassJsonProtocol._
         //@to-do check if user with given session already logged-in
         entity(as[UserClass]) { u =>
-          val findUserFuture = userRepository.findOneByLogin(u.email)
-          onComplete(findUserFuture) {
-            case Success(o) => {
-              o match {
-                case user:User => respondWithAuthHeader(user.email, user.password, true)
-                case _ => {
-                  println("trying to create temp user...")
-                  val newUser = userRepository.createFrom(u)
-                  respondWithAuthHeader(newUser.email, newUser.password, true)
+          optionalHeaderValueByName("X-Auth") {
+            case None => {
+              val findUserFuture = userRepository.findOneByLogin(u.email)
+              onComplete(findUserFuture) {
+                case Success(success0) => {
+                  success0 match {
+                    //if user found in DB
+                    case user:User => {
+                      val futureSession = loginByEmail(user.email)
+                      respondWithAuthHeader(futureSession)
+                    }
+                    //if user not found in DB
+                    case _ => {
+                      println("trying to create temp user...")
+                      val resp = userRepository.createFrom(u)
+                      onComplete(resp) {
+                        case Success(success1) => {
+                          println("loginByEmail newUser: User")
+                          val futureSession = loginByEmail(u.email)
+                          respondWithAuthHeader(futureSession)
+                        }
+                        //weird exception
+                        case Failure(e) => {
+                          println("ERROR weird exception!")
+                          failWith(e)
+                        }
+                      }
+                    }
+                  }
+                }
+                //weird exception(DB)
+                case Failure(e) => {
+                  println("ERROR weird exception 2!")
+                  failWith(e)
                 }
               }
-              
             }
-            case Failure(e) => {
-              failWith(e)
+            case xAuth => {
+              val futureSession = loginBySessionId(xAuth.getOrElse(""))
+              respondWithAuthHeader(futureSession)
             }
           }
         }
