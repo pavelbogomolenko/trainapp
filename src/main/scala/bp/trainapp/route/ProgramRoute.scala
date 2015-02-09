@@ -27,9 +27,11 @@ trait ProgramRoute extends HttpService
     pathPrefix("program") {
       get {
         auth { userSession =>
-          complete {
-            import bp.trainapp.model.ProgramJsonProtocol._
-            programRepository.findByUserId(userSession.userId)
+          parameters('id.?) { (id) =>
+            complete {
+              import bp.trainapp.model.ProgramJsonProtocol._
+              programRepository.findByUserIdAndId(userSession.userId, id)
+            } 
           }
         }
       } ~

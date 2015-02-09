@@ -18,21 +18,16 @@ class DeviceRepository extends BaseRepository {
   val collectionName = "device"
 
   def save(device: Device) = device match {
-    case Device(_id, _, _, _, _, _, _, _, _) if _id != None => {
+    case Device(_id, _, _, _) if _id != None => {
       val selector = BSONDocument("_id" -> device._id.get)
       val modifier = BSONDocument(
         "$set" -> BSONDocument(
           "title" -> device.title,
-          "userId" -> device.userId,
-          "isPrototype" -> device.isPrototype,
-          "attributes" -> device.attributes,
-          "programId" -> device.programId,
-          "trainingId" -> device.trainingId,
-          "lastTrained" -> device.lastTrained.map(_.getMillis())))
+          "attributes" -> device.attributes))
 
       update(selector, modifier)
     }
-    case Device(None, title, created, userId, attributes, isPrototype, programId, trainingId, lastTrained) => {
+    case Device(None, title, created, attributes) => {
       insert(device)
     }
   }
@@ -47,12 +42,7 @@ class DeviceRepository extends BaseRepository {
         _id = None,
         title = dc.title,
         created = Some(DateTime.now()),
-        userId = userId,
-        isPrototype = None,
-        attributes = dc.attributes,
-        programId = None,
-        trainingId = None,
-        lastTrained = None)
+        attributes = dc.attributes)
       save(device)
     }
     case duc: DeviceUpdateClass => {
@@ -60,12 +50,7 @@ class DeviceRepository extends BaseRepository {
         _id = Some(duc.id),
         title = duc.title,
         created = None,
-        userId = if (duc.userId != None) duc.userId else userId,
-        isPrototype = None,
-        attributes = duc.attributes,
-        programId = None,
-        trainingId = None,
-        lastTrained = None)
+        attributes = duc.attributes)
       save(device)
     }
     case _ => throw new Exception("createFrom not implemented for " + d.toString())

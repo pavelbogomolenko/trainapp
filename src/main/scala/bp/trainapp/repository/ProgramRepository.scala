@@ -34,8 +34,8 @@ class ProgramRepository extends BaseRepository {
     super.list[Model]()
   }
 
-  def findByUserId(userId: BSONObjectID) = {
-    val query = BSONDocument("userId" -> userId)
+  def findByUserIdAndId(userId: BSONObjectID, _id: Option[String] = None) = {
+    val query = BSONDocument("userId" -> userId, "_id" -> _id)
     super.list[Model](query)
   }
 
@@ -62,5 +62,4 @@ class ProgramRepository extends BaseRepository {
     }
     case _ => throw new Exception("createFrom not implemented for " + e.toString())
   }
-
 }

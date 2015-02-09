@@ -25,7 +25,6 @@ case class DeviceClass(
 case class DeviceUpdateClass(
   id: BSONObjectID,
   title: String,
-  userId: Option[BSONObjectID],
   attributes: Option[List[DeviceAttribute]]) extends Entity
 
 /**
@@ -61,7 +60,7 @@ object DeviceClassJsonProtocol extends DefaultJsonProtocol {
 object DeviceUpdateClassJsonProtocol extends DefaultJsonProtocol {
   import bp.trainapp.model.BaseModel._
   import bp.trainapp.model.DeviceAttributeJsonProtocol._
-  implicit val deviceUpdateClassJsonFormat = jsonFormat4(DeviceUpdateClass)
+  implicit val deviceUpdateClassJsonFormat = jsonFormat3(DeviceUpdateClass)
 }
 
 object ProgramClassJsonProtocol extends DefaultJsonProtocol {

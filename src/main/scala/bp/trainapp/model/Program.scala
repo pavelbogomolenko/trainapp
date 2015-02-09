@@ -21,10 +21,10 @@ object Program {
   implicit object ProgramWriter extends BSONDocumentWriter[Program] {
     def write(program: Program): BSONDocument = {
       BSONDocument(
-        "title" -> BSONString(program.title),
+        "title" -> program.title,
         "created" -> program.created.map(_.getMillis()),
         "userId" -> program.userId,
-        "devices" -> BSONArray(program.devices),
+        "devices" -> program.devices,
         "isDefault" -> program.isDefault)
     }
   }
@@ -36,7 +36,7 @@ object Program {
         doc.getAs[BSONString]("title").get.value,
         doc.getAs[BSONLong]("created").map(_.value.toDateTime),
         doc.getAs[BSONObjectID]("userId"),
-        doc.getAs[List[Device]]("attributes"),
+        doc.getAs[List[Device]]("devices"),
         doc.getAs[BSONInteger]("isStatic").map(_.value))
     }
   }
