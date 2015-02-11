@@ -26,8 +26,14 @@ abstract class BaseRepository extends MongoDbDriverComponent {
 
   private def fullCollectionName = db.dbName + "." + collectionName
 
-  def list[Model](query: db.Q = BSONDocument())(implicit reader: db.Reader[Model]): Future[List[Model]] = {
-    db.list[Model](fullCollectionName, query)
+  def list[Model](query: db.Q = BSONDocument(), 
+      sort: db.Q = BSONDocument(), limit: Int = 0)(implicit reader: db.Reader[Model]): Future[List[Model]] = {
+    db.list[Model](fullCollectionName, query, sort, limit)
+  }
+  
+  def one[Model](query: db.Q = BSONDocument(), 
+      sort: db.Q = BSONDocument())(implicit reader: db.Reader[Model]): Future[Option[Model]] = {
+    db.one[Model](fullCollectionName, query, sort)
   }
 
   def insert[Model](model: Model)(implicit writer: db.Writer[Model]): Future[_] = {
@@ -41,23 +47,23 @@ abstract class BaseRepository extends MongoDbDriverComponent {
   /**
    * remove data from table by query
    */
-  def remove(query: db.Q = BSONDocument()) = {
+  def remove(query: db.Q = BSONDocument()): Future[_] = {
     db.remove(fullCollectionName, query)
   }
 
   /**
    * get statistical information about collection
    */
-  def stats = {
+  def stats: Future[_] = {
     db.stats(fullCollectionName)
   }
 
   /**
-   * Find documents by id
+   * Find document by id
    */
-  def findById(id: BSONObjectID)(implicit reader: db.Reader[Model]): Future[List[Model]] = {
+  def findOneById(id: BSONObjectID)(implicit reader: db.Reader[Model]): Future[Option[Model]] = {
     val query = BSONDocument("_id" -> id)
-    list[Model](query)
+    one[Model](query)
   }
 
   /**
@@ -77,4 +83,5 @@ trait RepositoryComponent {
   lazy val userSessionRepository = new UserSessionRepository
   lazy val deviceRepository = new DeviceRepository
   lazy val programRepository = new ProgramRepository
+  lazy val trainingRepository = new TrainingRepository
 }

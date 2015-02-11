@@ -32,11 +32,17 @@ class MongoDbDriver(val host: String, val dbName: String) {
     connection(dbName)
   }
 
+  /**
+   * mongodb collection object
+   */
   def collection(name: String): BSONCollection = {
     connect(name)
   }
 
-  private def validateFuture(f: Future[_], errMsg: String): Future[_] = {
+  /**
+   * helper function to resolve future response from reactivemongo
+   */
+  private def resolveFuture(f: Future[_], errMsg: String): Future[_] = {
     f onComplete {
       case Success(result)  => result
       case Failure(failure) => throw new MongoDbDriverException(errMsg + " " + failure.getMessage())
@@ -44,21 +50,37 @@ class MongoDbDriver(val host: String, val dbName: String) {
     f
   }
 
-  def list[T](table: String, query: Q = BSONDocument())(implicit reader: Reader[T]): Future[List[T]] = {
+  /**
+   * wrapper for find method which return list of documents
+   */
+  def list[T](table: String, 
+      query: Q = BSONDocument(), sort: Q = BSONDocument(), limit: Int = 0)(implicit reader: Reader[T]): Future[List[T]] = {
     collection(table).
       find(query).
+      sort(sort).
       cursor[T].
-      collect[List]()
+      collect[List](limit)
+  }
+  
+  /**
+   * wrapper for find method which return only one document
+   */
+  def one[T](table: String, 
+      query: Q = BSONDocument(), sort: Q = BSONDocument())(implicit reader: Reader[T]): Future[Option[T]] = {
+    collection(table).
+      find(query).
+      sort(sort).
+      one[T]
   }
 
   def insert[T](table: String, model: T)(implicit writer: Writer[T]): Future[_] = {
     val res = collection(table).insert(model)
-    validateFuture(res, "Failed to insert record")
+    resolveFuture(res, "Failed to insert record")
   }
 
   def update(table: String, selector: Q, modifier: Q): Future[_] = {
     val res = collection(table).update(selector, modifier)
-    validateFuture(res, "Failed to update record")
+    resolveFuture(res, "Failed to update record")
   }
 
   /**
@@ -66,7 +88,7 @@ class MongoDbDriver(val host: String, val dbName: String) {
    */
   def drop(table: String): Future[_] = {
     val res = collection(table).drop()
-    validateFuture(res, "Failed to drop table")
+    resolveFuture(res, "Failed to drop table")
   }
 
   /**
@@ -74,11 +96,11 @@ class MongoDbDriver(val host: String, val dbName: String) {
    */
   def remove(table: String, query: Q = BSONDocument()) = {
     val res = collection(table).remove(query)
-    validateFuture(res, "Failed to remove data from table")
+    resolveFuture(res, "Failed to remove data from table")
   }
 
   def stats(table: String) = {
-    validateFuture(collection(table).stats, "Failed to get stats")
+    resolveFuture(collection(table).stats, "Failed to get stats")
   }
 }
 

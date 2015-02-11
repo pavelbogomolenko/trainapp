@@ -52,7 +52,7 @@ class ProgramRepository extends BaseRepository {
     }
     case puc: ProgramUpdateClass => {
       val program = Program(
-        _id = None,
+        _id = Some(puc.id),
         title = puc.title,
         created = None,
         userId = None,
