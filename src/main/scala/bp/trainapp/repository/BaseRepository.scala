@@ -27,7 +27,7 @@ abstract class BaseRepository extends MongoDbDriverComponent {
   private def fullCollectionName = db.dbName + "." + collectionName
 
   def list[Model](query: db.Q = BSONDocument(), 
-      sort: db.Q = BSONDocument(), limit: Int = 0)(implicit reader: db.Reader[Model]): Future[List[Model]] = {
+      sort: db.Q = BSONDocument(), limit: Int = 100)(implicit reader: db.Reader[Model]): Future[List[Model]] = {
     db.list[Model](fullCollectionName, query, sort, limit)
   }
   

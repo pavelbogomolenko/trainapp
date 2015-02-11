@@ -44,7 +44,10 @@ class UserRepository extends BaseRepository {
   def findOneByLogin(login: String): Future[Serializable] = {
     val query = BSONDocument("email" -> login)
     super.list[Model](query) map {
-      case List(futureUser) => futureUser
+      case List(futureUser) => {
+        println("findOneByLogin user found: ", login)
+        futureUser
+      }
       case _                => None
     }
   }

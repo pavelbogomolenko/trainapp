@@ -54,7 +54,7 @@ class MongoDbDriver(val host: String, val dbName: String) {
    * wrapper for find method which return list of documents
    */
   def list[T](table: String, 
-      query: Q = BSONDocument(), sort: Q = BSONDocument(), limit: Int = 0)(implicit reader: Reader[T]): Future[List[T]] = {
+      query: Q = BSONDocument(), sort: Q = BSONDocument(), limit: Int = 100)(implicit reader: Reader[T]): Future[List[T]] = {
     collection(table).
       find(query).
       sort(sort).

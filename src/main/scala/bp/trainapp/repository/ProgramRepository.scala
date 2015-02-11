@@ -35,7 +35,9 @@ class ProgramRepository extends BaseRepository {
   }
 
   def findByUserIdAndId(userId: BSONObjectID, _id: Option[String] = None) = {
-    val query = BSONDocument("userId" -> userId, "_id" -> _id)
+    println("findByUserIdAndId", userId, _id)
+    //val query = BSONDocument("userId" -> userId, "_id" -> _id)
+    val query = BSONDocument("userId" -> userId)
     super.list[Model](query)
   }
 
