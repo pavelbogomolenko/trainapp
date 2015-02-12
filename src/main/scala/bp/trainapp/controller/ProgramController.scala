@@ -1,8 +1,10 @@
 package bp.trainapp.controller
 
-import scala.util.{ Success, Failure }
+import scala.util.{ Success, Failure, Try }
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import reactivemongo.bson._
 
 import spray.http.HttpHeaders.RawHeader
 import spray.http.StatusCodes
@@ -16,12 +18,22 @@ trait ProgramController extends BaseController with AuthService with RepositoryC
   def findAction: Response = {
     auth { userSession =>
       parameters('id.?) { (id) =>
-        complete {
-          import bp.trainapp.model.ProgramJsonProtocol._
-          if(id.get.isEmpty()) programRepository.findByUserId(userSession.userId)
-          else
-            programRepository.findByUserIdAndId(userSession.userId, id)
-        } 
+        if(id.get.isEmpty()) {
+          complete {
+            import bp.trainapp.model.ProgramJsonProtocol._
+            programRepository.findByUserId(userSession.userId)  
+          }
+        }
+        else {
+          if(BSONObjectID.parse(id.get).isFailure) {
+            complete(StatusCodes.BadRequest,  """{"status": "Expected BSONObjectID as JsString"}""") 
+          } else {
+            complete {
+              import bp.trainapp.model.ProgramJsonProtocol._
+              programRepository.findByUserIdAndId(userSession.userId, BSONObjectID.apply(id.get))
+            }
+          }
+        }
       }
     }
   }

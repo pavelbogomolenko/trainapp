@@ -39,7 +39,7 @@ class ProgramRepository extends BaseRepository {
     super.list[Model](query)
   }
 
-  def findByUserIdAndId(userId: BSONObjectID, _id: Option[String] = None) = {
+  def findByUserIdAndId(userId: BSONObjectID, _id: BSONObjectID) = {
     val query = BSONDocument("userId" -> userId, "_id" -> _id)
     super.list[Model](query)
   }
