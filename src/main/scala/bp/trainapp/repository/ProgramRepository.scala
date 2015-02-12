@@ -33,11 +33,14 @@ class ProgramRepository extends BaseRepository {
   def list(): Future[List[Model]] = {
     super.list[Model]()
   }
+  
+  def findByUserId(userId: BSONObjectID) = {
+    val query = BSONDocument("userId" -> userId)
+    super.list[Model](query)
+  }
 
   def findByUserIdAndId(userId: BSONObjectID, _id: Option[String] = None) = {
-    println("findByUserIdAndId", userId, _id)
-    //val query = BSONDocument("userId" -> userId, "_id" -> _id)
-    val query = BSONDocument("userId" -> userId)
+    val query = BSONDocument("userId" -> userId, "_id" -> _id)
     super.list[Model](query)
   }
 

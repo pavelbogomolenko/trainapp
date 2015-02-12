@@ -15,49 +15,24 @@ import spray.json._
 
 import reactivemongo.bson._
 
+import bp.trainapp.controller.ProgramController
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.model._
 import bp.trainapp.service._
 import bp.trainapp.utils.SprayAuthDirective
 
-trait ProgramRoute extends HttpService
-  with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
+trait ProgramRoute extends HttpService with ProgramController {
 
   val programRoute =
     pathPrefix("program") {
       get {
-        auth { userSession =>
-          parameters('id.?) { (id) =>
-            complete {
-              import bp.trainapp.model.ProgramJsonProtocol._
-              programRepository.findByUserIdAndId(userSession.userId, id)
-            } 
-          }
-        }
+        findAction
       } ~
       post {
-        auth { userSession =>
-          import bp.trainapp.model.ProgramClassJsonProtocol._
-          entity(as[ProgramClass]) { program =>
-            val res = programRepository.createFrom(program, Some(userSession.userId))
-            onComplete(res) {
-              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-              case Failure(e) => failWith(e)
-            }
-          }
-        }
+        createAction
       } ~
       put {
-        auth { userSession =>
-          import bp.trainapp.model.ProgramUpdateClassJsonProtocol._
-          entity(as[ProgramUpdateClass]) { programUpdate =>
-            val res = programRepository.createFrom(programUpdate, Some(userSession.userId))
-            onComplete(res) {
-              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-              case Failure(e) => failWith(e)
-            }
-          }
-        }
+        updateAction
       }
     }
 }
