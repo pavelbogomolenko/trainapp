@@ -29,10 +29,10 @@ trait ProgramRoute extends HttpService with ProgramController {
         findAction
       } ~
       post {
-        createAction
+        createProgramAction
       } ~
       put {
-        updateAction
+        updateProgramAction
       }
     }
 }

@@ -61,7 +61,7 @@ class TrainingRepository extends BaseRepository {
       "userId" -> userId,
       "programId" -> programId)
     val sort = BSONDocument("_id" -> -1)
-    super.one[Model](query)   
+    super.one[Model](query, sort)
   }
   
   def createFrom(e: Entity, userId: Option[BSONObjectID] = None) = e match {

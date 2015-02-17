@@ -38,7 +38,7 @@ trait ProgramController extends BaseController with AuthService with RepositoryC
     }
   }
   
-  def createAction: Response = {
+  def createProgramAction: Response = {
     auth { userSession =>
       import bp.trainapp.model.ProgramClassJsonProtocol._
       entity(as[ProgramClass]) { program =>
@@ -51,7 +51,7 @@ trait ProgramController extends BaseController with AuthService with RepositoryC
     }
   }
   
-  def updateAction: Response = {
+  def updateProgramAction: Response = {
     auth { userSession =>
       import bp.trainapp.model.ProgramUpdateClassJsonProtocol._
       entity(as[ProgramUpdateClass]) { programUpdate =>

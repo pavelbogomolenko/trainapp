@@ -15,49 +15,23 @@ import spray.json._
 
 import reactivemongo.bson._
 
+import bp.trainapp.controller.TrainingController
 import bp.trainapp.repository.RepositoryComponent
 import bp.trainapp.model._
 import bp.trainapp.service._
-import bp.trainapp.utils.SprayAuthDirective
 
-trait TrainingRoute extends HttpService
-  with SprayJsonSupport with SprayAuthDirective with RepositoryComponent {
+trait TrainingRoute extends HttpService with TrainingController {
 
   val trainingRoute =
     pathPrefix("training") {
       get {
-        auth { userSession =>
-          parameters('programId) { (programId) =>
-            complete {
-              import bp.trainapp.model.TrainingJsonProtocol._
-              trainingRepository.findLastUserTraining(userSession.userId, BSONObjectID(programId))
-            } 
-          }
-        }
+        getLastTrainingAction
       } ~
       post {
-        auth { userSession =>
-          import bp.trainapp.model.TrainingClassJsonProtocol._
-          entity(as[TrainingClass]) { training =>
-            val res = trainingRepository.createFrom(training, Some(userSession.userId))
-            onComplete(res) {
-              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-              case Failure(e) => failWith(e)
-            }
-          }
-        }
+        createTrainingAction
       } ~
       put {
-        auth { userSession =>
-          import bp.trainapp.model.TrainingUpdateClassJsonProtocol._
-          entity(as[TrainingUpdateClass]) { training =>
-            val res = trainingRepository.createFrom(training, Some(userSession.userId))
-            onComplete(res) {
-              case Success(r) => complete(StatusCodes.Created, """{"status": "ok"}""")
-              case Failure(e) => failWith(e)
-            }
-          }
-        }
+        updateTrainingAction
       }
     }
 }
