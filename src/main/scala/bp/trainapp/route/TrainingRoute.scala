@@ -15,33 +15,23 @@ import spray.json._
 
 import reactivemongo.bson._
 
-import bp.trainapp.controller.AuthController
+import bp.trainapp.controller.TrainingController
 import bp.trainapp.repository.RepositoryComponent
-import bp.trainapp.utils.SprayAuthDirective
 import bp.trainapp.model._
 import bp.trainapp.service._
 
-trait AuthRoute extends HttpService with AuthController {
+trait TrainingRoute extends HttpService with TrainingController {
 
-  val authRoute =
-    pathPrefix("islogin") {
+  val trainingRoute =
+    pathPrefix("training") {
       get {
-        isLoginAction
-      }
-    } ~
-    pathPrefix("login") {
+        getLastTrainingAction
+      } ~
       post {
-        loginAction
-      }
-    } ~
-    pathPrefix("fblogin") {
-      post {
-        fbLoginAction
-      }
-    } ~
-    pathPrefix("logout") {
-      post {
-        logoutAction
+        createTrainingAction
+      } ~
+      put {
+        updateTrainingAction
       }
     }
 }
