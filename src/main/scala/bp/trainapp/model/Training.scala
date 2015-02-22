@@ -9,37 +9,41 @@ import reactivemongo.bson._
 import reactivemongo.bson.{ BSONReader, BSONWriter }
 
 case class Training(
-	_id: Option[BSONObjectID],
-	userId: Option[BSONObjectID],
-	programId: Option[BSONObjectID],
-	start: DateTime,
-	finish: Option[DateTime])
+  _id: Option[BSONObjectID],
+  userId: Option[BSONObjectID],
+  programId: Option[BSONObjectID],
+  devices: Option[List[Device]],
+  start: Option[DateTime],
+  finish: Option[DateTime])
 
 object Training {
 
-	implicit object TrainingWriter extends BSONDocumentWriter[Training] {
-		def write(training: Training): BSONDocument = {
-			BSONDocument(
-				"userId" -> training.userId,
-				"programId" -> training.programId,
-				"start" -> BSONLong(training.start.getMillis()),
-				"finish" -> training.finish.map(_.getMillis()))
-		}
-	}
+  implicit object TrainingWriter extends BSONDocumentWriter[Training] {
+    def write(training: Training): BSONDocument = {
+      BSONDocument(
+        "userId" -> training.userId,
+        "programId" -> training.programId,
+        "devices" -> training.devices,
+        "start" -> training.start.map(_.getMillis()),
+        "finish" -> training.finish.map(_.getMillis()))
+    }
+  }
 
-	implicit object ProgrammReader extends BSONDocumentReader[Training] {
-		def read(doc: BSONDocument): Training = {
-			Training(
-				doc.getAs[BSONObjectID]("_id"),
-				doc.getAs[BSONObjectID]("userId"),
-				doc.getAs[BSONObjectID]("programId"),
-				doc.getAs[BSONLong]("start").get.value.toDateTime,
-				doc.getAs[BSONLong]("finish").map(_.value.toDateTime))
-		}
-	}
+  implicit object ProgrammReader extends BSONDocumentReader[Training] {
+    def read(doc: BSONDocument): Training = {
+      Training(
+        doc.getAs[BSONObjectID]("_id"),
+        doc.getAs[BSONObjectID]("userId"),
+        doc.getAs[BSONObjectID]("programId"),
+        doc.getAs[List[Device]]("devices"),
+        doc.getAs[BSONLong]("start").map(_.value.toDateTime),
+        doc.getAs[BSONLong]("finish").map(_.value.toDateTime))
+    }
+  }
 }
 
 object TrainingJsonProtocol extends DefaultJsonProtocol {
-	import bp.trainapp.model.BaseModel._
-	implicit val trainingJsonFormat = jsonFormat5(Training.apply)
+  import bp.trainapp.model.BaseModel._
+  import bp.trainapp.model.DeviceJsonProtocol._
+  implicit val trainingJsonFormat = jsonFormat6(Training.apply)
 }
